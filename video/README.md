@@ -1,6 +1,6 @@
 # The explainer film
 
-A ~5 minute narrated walkthrough of why a fan-out view entity cannot carry an
+A 4m21s narrated walkthrough of why a fan-out view entity cannot carry an
 enumeration in its OData key, what breaks if you route around it carelessly, and
 what the database actually does with the fix.
 

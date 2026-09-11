@@ -110,7 +110,7 @@ design properties Atlas 10 does not carry.)
 
 ## The explainer film
 
-[`video/`](video) builds a ~5 minute narrated walkthrough of all of this —
+[`video/`](video) builds a 4m21s narrated walkthrough of all of this —
 `view-entity-odata-key.mp4`. Domain model, the OQL and what the fan-out term
 does to it, the build error, the non-unique key, both workarounds, and then the
 SQL and the query plan the OData call actually produces.
