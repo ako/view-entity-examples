@@ -5,6 +5,22 @@
 # App security is off in this demo, so no credentials are needed. In a real app
 # the service declares `authentication basic` and every call carries
 # `Authorization: Basic ...`.
+#
+# HOW TO RUN THIS FILE
+#
+# In an editor - a "Send Request" link appears above each ### block:
+#   VS Code        install the REST Client extension (humao.rest-client)
+#   JetBrains      built in (Endpoints / HTTP Client), no plugin needed
+#   Visual Studio  built in from 2022 17.5
+#
+# From a terminal:
+#   npm install -g httpyac
+#   httpyac send requests/submissions.http --all --output short   # all 12
+#   httpyac send requests/submissions.http --name "Workaround A: read one row back by its full key"
+#
+# The whole file is verified against the 10.24.24 app: 12 requests, 12 x 200.
+# Spaces and quotes inside $filter are left readable here; every client
+# percent-encodes them on the way out.
 
 @base = http://localhost:8080/odata/submissions/v1
 

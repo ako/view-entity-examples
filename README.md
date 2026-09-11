@@ -29,7 +29,16 @@ two quarters each. Then, from another terminal:
 curl 'http://localhost:8080/odata/submissions/v1/QuarterSubmissionPerType(profileNumber=300,periodYear=2025,quarterNo=1,contractTypeKey=%27Freelance%27)'
 ```
 
-[`requests/submissions.http`](requests/submissions.http) has the full set.
+[`requests/submissions.http`](requests/submissions.http) has the full set —
+open it in VS Code with the REST Client extension (or any JetBrains IDE, which
+has an HTTP client built in) and click *Send Request*, or run the lot from a
+terminal:
+
+```bash
+npm install -g httpyac
+httpyac send requests/submissions.http --all --output short
+```
+
 App security is off, so no credentials are needed.
 
 ## The four resources
