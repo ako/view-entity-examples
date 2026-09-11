@@ -1,0 +1,42 @@
+-- Reproduces the constraint. Apply this script and the project stops building:
+--
+--   ./mxcli exec ../mdl/99-enum-key-blocked.mdl -p ViewEntityExamples.mpr
+--   ./mxcli run --local -p ViewEntityExamples.mpr
+--
+--   ERROR at Submissions, Published OData service 'BlockedApi',
+--   Published entity 'QuarterSubmissionPerTypeVE':
+--   Only stored attributes which are of type (String, Integer, Long or
+--   AutoNumber) are supported as a key.
+--
+-- Undo with:
+--   ./mxcli -p ViewEntityExamples.mpr -c "DROP ODATA SERVICE Submissions.BlockedApi;"
+--
+-- Note what the message actually says: the allowed set is String, Integer,
+-- Long and AutoNumber. Enumeration is not the only type excluded - Decimal,
+-- DateTime and Boolean are out too, and so is any non-stored (calculated)
+-- attribute. Everything else about this service is valid; drop 'key' from
+-- contractType and it builds.
+
+create or modify odata service Submissions.BlockedApi (
+  path: 'odata/blocked/v1/',
+  version: '1.0.0',
+  ODataVersion: OData4,
+  namespace: 'Submissions.Blocked'
+)
+authentication basic
+{
+  publish entity Submissions.QuarterSubmissionPerTypeVE as 'QuarterSubmissionPerType' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    ProfileNumber as 'profileNumber' (key, Filterable, Sortable),
+    PeriodYear    as 'periodYear'    (key, Filterable, Sortable),
+    QuarterNo     as 'quarterNo'     (key, Filterable, Sortable),
+    ContractType  as 'contractType'  (key, Filterable, Sortable),
+    TotalAmount   as 'totalAmount'   (Filterable, Sortable),
+    LineCount     as 'lineCount'     (Filterable, Sortable)
+  );
+};

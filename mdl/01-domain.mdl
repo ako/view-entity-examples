@@ -1,0 +1,45 @@
+-- Demo domain model: quarterly submissions per profile, fanned out by contract type.
+--
+-- Profile 1..n  Contract 1..n  SubmissionLine
+-- A profile can hold contracts of several types; every submission line belongs
+-- to one contract, so a quarter's submission fans out per contract type.
+
+create module Submissions;
+
+create enumeration Submissions.ContractType (
+  Permanent 'Permanent',
+  Temporary 'Temporary',
+  Freelance 'Freelance'
+);
+
+@position(100, 100)
+create persistent entity Submissions.Profile (
+  ProfileNumber: Integer,
+  Name: String(100)
+)
+index (ProfileNumber);
+
+@position(400, 100)
+create persistent entity Submissions.Contract (
+  ContractNumber: String(20),
+  ContractType: Enumeration(Submissions.ContractType)
+);
+
+@position(700, 100)
+create persistent entity Submissions.SubmissionLine (
+  SubmissionYear: Integer,
+  QuarterNo: Integer,
+  Amount: Decimal
+);
+
+create association Submissions.Contract_Profile
+  from Submissions.Contract to Submissions.Profile
+  type Reference
+  owner Default
+  delete_behavior CASCADE;
+
+create association Submissions.SubmissionLine_Contract
+  from Submissions.SubmissionLine to Submissions.Contract
+  type Reference
+  owner Default
+  delete_behavior CASCADE;

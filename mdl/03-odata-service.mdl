@@ -1,0 +1,92 @@
+-- One published OData service with four resources, so the same data can be
+-- fetched four ways and compared.
+--
+--   QuarterSubmission              the control: no fan-out, ordinary composite key
+--   QuarterSubmissionPerTypeBroken the fan-out keyed WITHOUT the contract type
+--                                  - builds, but the key is not unique
+--   QuarterSubmissionPerType       workaround A: String shadow of the enumeration
+--   QuarterSubmissionPerTypeById   workaround C: one composite String id
+
+-- (the ProbeApi service used to capture the build error is dropped separately)
+
+create or modify odata service Submissions.SubmissionsApi (
+  path: 'odata/submissions/v1/',
+  version: '1.0.0',
+  ODataVersion: OData4,
+  namespace: 'Submissions',
+  ServiceName: 'SubmissionsApi',
+  Summary: 'Quarterly submissions per profile, with and without a contract-type fan-out'
+)
+authentication basic
+{
+  -- Control. One row per profile per quarter, so the natural key is unique
+  -- and every part of it is an Integer.
+  publish entity Submissions.QuarterSubmissionVE as 'QuarterSubmission' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    ProfileNumber as 'profileNumber' (key, Filterable, Sortable),
+    PeriodYear    as 'periodYear'    (key, Filterable, Sortable),
+    QuarterNo     as 'quarterNo'     (key, Filterable, Sortable),
+    TotalAmount   as 'totalAmount'   (Filterable, Sortable),
+    LineCount     as 'lineCount'     (Filterable, Sortable)
+  );
+
+  -- What you are left with when the enumeration cannot go in the key: the
+  -- contract type is published as an ordinary attribute and the key covers
+  -- only profile + quarter. Mendix accepts this. The rows are not uniquely
+  -- addressable, and a client reading one back by key gets an arbitrary row
+  -- of the group - see docs/03-why-dropping-the-enum-is-not-a-workaround.md.
+  publish entity Submissions.QuarterSubmissionPerTypeVE as 'QuarterSubmissionPerTypeBroken' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    ProfileNumber as 'profileNumber' (key, Filterable, Sortable),
+    PeriodYear    as 'periodYear'    (key, Filterable, Sortable),
+    QuarterNo     as 'quarterNo'     (key, Filterable, Sortable),
+    ContractType  as 'contractType'  (Filterable, Sortable),
+    TotalAmount   as 'totalAmount'   (Filterable, Sortable),
+    LineCount     as 'lineCount'     (Filterable, Sortable)
+  );
+
+  -- Workaround A. The enumeration stays in the payload for readers; the
+  -- String copy of it carries the key.
+  publish entity Submissions.QuarterSubmissionPerTypeApiVE as 'QuarterSubmissionPerType' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    ProfileNumber   as 'profileNumber'   (key, Filterable, Sortable),
+    PeriodYear      as 'periodYear'      (key, Filterable, Sortable),
+    QuarterNo       as 'quarterNo'       (key, Filterable, Sortable),
+    ContractTypeKey as 'contractTypeKey' (key, Filterable, Sortable),
+    ContractType    as 'contractType'    (Filterable, Sortable),
+    TotalAmount     as 'totalAmount'     (Filterable, Sortable),
+    LineCount       as 'lineCount'       (Filterable, Sortable)
+  );
+
+  -- Workaround C. One key segment; the parts stay filterable.
+  publish entity Submissions.QuarterSubmissionPerTypeIdVE as 'QuarterSubmissionPerTypeById' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    RowId         as 'id'            (key, Filterable, Sortable),
+    ProfileNumber as 'profileNumber' (Filterable, Sortable),
+    PeriodYear    as 'periodYear'    (Filterable, Sortable),
+    QuarterNo     as 'quarterNo'     (Filterable, Sortable),
+    ContractType  as 'contractType'  (Filterable, Sortable),
+    TotalAmount   as 'totalAmount'   (Filterable, Sortable),
+    LineCount     as 'lineCount'     (Filterable, Sortable)
+  );
+};

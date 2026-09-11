@@ -1,0 +1,79 @@
+-- Demo data, created once at startup.
+--
+-- Three profiles with a deliberately uneven number of contract types, so the
+-- fan-out is visible:
+--   100 Acme BV      1 type  (Permanent)
+--   200 Borealis NV  2 types (Permanent, Freelance)
+--   300 Cygnus Ltd   3 types (Permanent, Temporary, Freelance)
+-- Two quarters each, so QuarterSubmission has 6 rows and
+-- QuarterSubmissionPerType has 12.
+
+-- An after-startup microflow must return a Boolean (CE0142), and it must
+-- return TRUE: returning false makes the runtime treat startup as failed
+-- ("The after-startup-action failed with an exception or returned false") and
+-- the app does not come up. So the "already seeded" path returns true as well,
+-- and only skips the work.
+create or modify microflow Submissions.ASu_CreateDemoData ()
+  returns Boolean as $Started
+begin
+  retrieve $ExistingProfiles from Submissions.Profile;
+  $ExistingCount = count($ExistingProfiles);
+  if $ExistingCount = 0 then
+    $Acme = create Submissions.Profile (ProfileNumber = 100, Name = 'Acme BV') commit;
+    $Borealis = create Submissions.Profile (ProfileNumber = 200, Name = 'Borealis NV') commit;
+    $Cygnus = create Submissions.Profile (ProfileNumber = 300, Name = 'Cygnus Ltd') commit;
+
+    $AcmePerm = create Submissions.Contract (
+      ContractNumber = 'PRM-100', ContractType = Submissions.ContractType.Permanent,
+      Submissions.Contract_Profile = $Acme) commit;
+
+    $BorealisPerm = create Submissions.Contract (
+      ContractNumber = 'PRM-200', ContractType = Submissions.ContractType.Permanent,
+      Submissions.Contract_Profile = $Borealis) commit;
+    $BorealisFree = create Submissions.Contract (
+      ContractNumber = 'FRL-200', ContractType = Submissions.ContractType.Freelance,
+      Submissions.Contract_Profile = $Borealis) commit;
+
+    $CygnusPerm = create Submissions.Contract (
+      ContractNumber = 'PRM-300', ContractType = Submissions.ContractType.Permanent,
+      Submissions.Contract_Profile = $Cygnus) commit;
+    $CygnusTemp = create Submissions.Contract (
+      ContractNumber = 'TMP-300', ContractType = Submissions.ContractType.Temporary,
+      Submissions.Contract_Profile = $Cygnus) commit;
+    $CygnusFree = create Submissions.Contract (
+      ContractNumber = 'FRL-300', ContractType = Submissions.ContractType.Freelance,
+      Submissions.Contract_Profile = $Cygnus) commit;
+
+    $L1 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 1, Amount = 1000,
+      Submissions.SubmissionLine_Contract = $AcmePerm) commit;
+    $L2 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 2, Amount = 1100,
+      Submissions.SubmissionLine_Contract = $AcmePerm) commit;
+
+    $L3 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 1, Amount = 2000,
+      Submissions.SubmissionLine_Contract = $BorealisPerm) commit;
+    $L4 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 2, Amount = 2100,
+      Submissions.SubmissionLine_Contract = $BorealisPerm) commit;
+    $L5 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 1, Amount = 250,
+      Submissions.SubmissionLine_Contract = $BorealisFree) commit;
+    $L6 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 2, Amount = 260,
+      Submissions.SubmissionLine_Contract = $BorealisFree) commit;
+
+    $L7 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 1, Amount = 3000,
+      Submissions.SubmissionLine_Contract = $CygnusPerm) commit;
+    $L8 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 2, Amount = 3100,
+      Submissions.SubmissionLine_Contract = $CygnusPerm) commit;
+    $L9 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 1, Amount = 400,
+      Submissions.SubmissionLine_Contract = $CygnusTemp) commit;
+    $L10 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 2, Amount = 410,
+      Submissions.SubmissionLine_Contract = $CygnusTemp) commit;
+    $L11 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 1, Amount = 55.5,
+      Submissions.SubmissionLine_Contract = $CygnusFree) commit;
+    $L12 = create Submissions.SubmissionLine (SubmissionYear = 2025, QuarterNo = 2, Amount = 66.5,
+      Submissions.SubmissionLine_Contract = $CygnusFree) commit;
+
+    log info node 'Submissions' 'Demo data created: 3 profiles, 6 contracts, 12 submission lines';
+  end if;
+  return true;
+end;
+
+alter settings model AfterStartupMicroflow = 'Submissions.ASu_CreateDemoData';

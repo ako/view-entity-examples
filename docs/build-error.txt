@@ -1,0 +1,11 @@
+$ ./mxcli exec ../mdl/99-enum-key-blocked.mdl -p ViewEntityExamples.mpr
+Created OData service: Submissions.BlockedApi
+
+$ mxbuild --target=deploy ViewEntityExamples.mpr        # Mendix 11.14.0
+Executing step 'Synchronize with file system'
+Executing step 'Initialize'
+Executing step 'Check prerequisites'
+Executing step 'Clean up'
+ERROR: The project cannot be deployed, because it contains errors.
+ERROR at Submissions, Published OData service 'BlockedApi', Published entity 'QuarterSubmissionPerTypeVE': Only stored attributes which are of type (String, Integer, Long or AutoNumber) are supported as a key.
+BUILD FAILED

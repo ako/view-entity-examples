@@ -1,0 +1,10 @@
+{
+    "@odata.context": "http://localhost:8080/odata/submissions/v1/$metadata#QuarterSubmissionPerType/$entity",
+    "profileNumber": 300,
+    "periodYear": 2025,
+    "quarterNo": 1,
+    "contractTypeKey": "Freelance",
+    "contractType": "Freelance",
+    "totalAmount": 55.5,
+    "lineCount": 1
+}

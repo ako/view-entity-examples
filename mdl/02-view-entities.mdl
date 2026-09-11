@@ -1,0 +1,114 @@
+-- The four view entities the demo compares.
+--
+--   QuarterSubmissionVE            one row per profile per quarter   (no fan-out)
+--   QuarterSubmissionPerTypeVE     one row per profile/quarter/type  (fan-out, enum attribute)
+--   QuarterSubmissionPerTypeApiVE  same rows + a String shadow of the enum   (workaround A)
+--   QuarterSubmissionPerTypeIdVE   same rows + one composite String id       (workaround C)
+
+/**
+ * One row per profile per quarter. Nothing fans out, so (ProfileNumber,
+ * PeriodYear, QuarterNo) is a unique key and publishes without trouble.
+ */
+@position(100, 400)
+create or modify view entity Submissions.QuarterSubmissionVE (
+  ProfileNumber: Integer,
+  PeriodYear: Integer,
+  QuarterNo: Integer,
+  TotalAmount: Decimal,
+  LineCount: Integer
+) as (
+  select p.ProfileNumber    as ProfileNumber
+  ,      sl.SubmissionYear  as PeriodYear
+  ,      sl.QuarterNo       as QuarterNo
+  ,      sum(sl.Amount)     as TotalAmount
+  ,      count(sl.ID)       as LineCount
+  from   Submissions.SubmissionLine as sl
+    inner join sl/Submissions.SubmissionLine_Contract/Submissions.Contract as c
+    inner join c/Submissions.Contract_Profile/Submissions.Profile as p
+  group by p.ProfileNumber, sl.SubmissionYear, sl.QuarterNo
+);
+
+/**
+ * The same data fanned out per contract type. ContractType is an
+ * enumeration, which is exactly the attribute an OData key needs and
+ * cannot have.
+ */
+@position(400, 400)
+create or modify view entity Submissions.QuarterSubmissionPerTypeVE (
+  ProfileNumber: Integer,
+  PeriodYear: Integer,
+  QuarterNo: Integer,
+  ContractType: Enumeration(Submissions.ContractType),
+  TotalAmount: Decimal,
+  LineCount: Integer
+) as (
+  select p.ProfileNumber    as ProfileNumber
+  ,      sl.SubmissionYear  as PeriodYear
+  ,      sl.QuarterNo       as QuarterNo
+  ,      c.ContractType     as ContractType
+  ,      sum(sl.Amount)     as TotalAmount
+  ,      count(sl.ID)       as LineCount
+  from   Submissions.SubmissionLine as sl
+    inner join sl/Submissions.SubmissionLine_Contract/Submissions.Contract as c
+    inner join c/Submissions.Contract_Profile/Submissions.Profile as p
+  group by p.ProfileNumber, sl.SubmissionYear, sl.QuarterNo, c.ContractType
+);
+
+/**
+ * Workaround A: keep the enumeration for readers, and carry a String copy
+ * of it - cast(... as string) yields the enumeration value NAME - to put
+ * in the OData key.
+ */
+@position(700, 400)
+create or modify view entity Submissions.QuarterSubmissionPerTypeApiVE (
+  ProfileNumber: Integer,
+  PeriodYear: Integer,
+  QuarterNo: Integer,
+  ContractType: Enumeration(Submissions.ContractType),
+  ContractTypeKey: String(200),
+  TotalAmount: Decimal,
+  LineCount: Integer
+) as (
+  select p.ProfileNumber                    as ProfileNumber
+  ,      sl.SubmissionYear                  as PeriodYear
+  ,      sl.QuarterNo                       as QuarterNo
+  ,      c.ContractType                     as ContractType
+  ,      cast(c.ContractType as string)     as ContractTypeKey
+  ,      sum(sl.Amount)                     as TotalAmount
+  ,      count(sl.ID)                       as LineCount
+  from   Submissions.SubmissionLine as sl
+    inner join sl/Submissions.SubmissionLine_Contract/Submissions.Contract as c
+    inner join c/Submissions.Contract_Profile/Submissions.Profile as p
+  group by p.ProfileNumber, sl.SubmissionYear, sl.QuarterNo, c.ContractType
+);
+
+/**
+ * Workaround C: one String id built from the three key parts, so the OData
+ * URL has a single key segment. The parts stay available as ordinary
+ * filterable attributes.
+ */
+@position(1000, 400)
+create or modify view entity Submissions.QuarterSubmissionPerTypeIdVE (
+  RowId: String(200),
+  ProfileNumber: Integer,
+  PeriodYear: Integer,
+  QuarterNo: Integer,
+  ContractType: Enumeration(Submissions.ContractType),
+  TotalAmount: Decimal,
+  LineCount: Integer
+) as (
+  select cast(p.ProfileNumber as string) + '-'
+         + cast(sl.SubmissionYear as string) + 'Q'
+         + cast(sl.QuarterNo as string) + '-'
+         + cast(c.ContractType as string)   as RowId
+  ,      p.ProfileNumber                    as ProfileNumber
+  ,      sl.SubmissionYear                  as PeriodYear
+  ,      sl.QuarterNo                       as QuarterNo
+  ,      c.ContractType                     as ContractType
+  ,      sum(sl.Amount)                     as TotalAmount
+  ,      count(sl.ID)                       as LineCount
+  from   Submissions.SubmissionLine as sl
+    inner join sl/Submissions.SubmissionLine_Contract/Submissions.Contract as c
+    inner join c/Submissions.Contract_Profile/Submissions.Profile as p
+  group by p.ProfileNumber, sl.SubmissionYear, sl.QuarterNo, c.ContractType
+);

@@ -1,0 +1,45 @@
+# Requests against the running demo app.
+#
+#   cd app && ./mxcli run --local --ensure-db -p ViewEntityExamples.mpr
+#
+# App security is off in this demo, so no credentials are needed. In a real app
+# the service declares `authentication basic` and every call carries
+# `Authorization: Basic ...`.
+
+@base = http://localhost:8080/odata/submissions/v1
+
+### Service document — the four resources
+GET {{base}}/
+
+### $metadata — note contractType is Edm.String everywhere
+GET {{base}}/$metadata
+
+### Control: one row per profile per quarter, key is three Integers
+GET {{base}}/QuarterSubmission?$orderby=profileNumber,quarterNo
+
+### Control: read one row back by its key
+GET {{base}}/QuarterSubmission(profileNumber=300,periodYear=2025,quarterNo=1)
+
+### The fan-out, keyed WITHOUT the contract type — three rows share this key
+GET {{base}}/QuarterSubmissionPerTypeBroken?$filter=profileNumber eq 300 and quarterNo eq 1
+
+### ...and asking for that key returns an arbitrary one of them, with a 200
+GET {{base}}/QuarterSubmissionPerTypeBroken(profileNumber=300,periodYear=2025,quarterNo=1)
+
+### Filtering on the enumeration works — Mendix parses 'Freelance' from the query string
+GET {{base}}/QuarterSubmissionPerTypeBroken?$filter=contractType eq 'Freelance'
+
+### Workaround A: the String shadow carries the key
+GET {{base}}/QuarterSubmissionPerType?$orderby=profileNumber,quarterNo,contractTypeKey
+
+### Workaround A: read one row back by its full key
+GET {{base}}/QuarterSubmissionPerType(profileNumber=300,periodYear=2025,quarterNo=1,contractTypeKey='Freelance')
+
+### Workaround A: filter on the key attribute
+GET {{base}}/QuarterSubmissionPerType?$filter=contractTypeKey eq 'Freelance'
+
+### Workaround C: one composite id
+GET {{base}}/QuarterSubmissionPerTypeById
+
+### Workaround C: read one row back by that id
+GET {{base}}/QuarterSubmissionPerTypeById('300-2025Q1-Temporary')

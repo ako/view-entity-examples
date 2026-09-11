@@ -1,0 +1,226 @@
+<?xml version="1.0" ?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Submissions">
+      <EntityType Name="QuarterSubmissionVE">
+        <Key>
+          <PropertyRef Name="profileNumber"/>
+          <PropertyRef Name="periodYear"/>
+          <PropertyRef Name="quarterNo"/>
+        </Key>
+        <Property Name="profileNumber" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="periodYear" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="quarterNo" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="totalAmount" Scale="variable" Type="Edm.Decimal"/>
+        <Property Name="lineCount" Type="Edm.Int64"/>
+      </EntityType>
+      <EntityType Name="QuarterSubmissionPerTypeVE">
+        <Key>
+          <PropertyRef Name="profileNumber"/>
+          <PropertyRef Name="periodYear"/>
+          <PropertyRef Name="quarterNo"/>
+        </Key>
+        <Property Name="profileNumber" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="periodYear" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="quarterNo" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="contractType" Type="Edm.String"/>
+        <Property Name="totalAmount" Scale="variable" Type="Edm.Decimal"/>
+        <Property Name="lineCount" Type="Edm.Int64"/>
+      </EntityType>
+      <EntityType Name="QuarterSubmissionPerTypeApiVE">
+        <Key>
+          <PropertyRef Name="profileNumber"/>
+          <PropertyRef Name="periodYear"/>
+          <PropertyRef Name="quarterNo"/>
+          <PropertyRef Name="contractTypeKey"/>
+        </Key>
+        <Property Name="profileNumber" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="periodYear" Nullable="false" Type="Edm.Int64"/>
+        <Property Name="quarterNo" Nullable="false" Type="Edm.Int64"/>
+        <Property MaxLength="200" Name="contractTypeKey" Nullable="false" Type="Edm.String"/>
+        <Property Name="contractType" Type="Edm.String"/>
+        <Property Name="totalAmount" Scale="variable" Type="Edm.Decimal"/>
+        <Property Name="lineCount" Type="Edm.Int64"/>
+      </EntityType>
+      <EntityType Name="QuarterSubmissionPerTypeIdVE">
+        <Key>
+          <PropertyRef Name="id"/>
+        </Key>
+        <Property MaxLength="200" Name="id" Nullable="false" Type="Edm.String"/>
+        <Property Name="profileNumber" Type="Edm.Int64"/>
+        <Property Name="periodYear" Type="Edm.Int64"/>
+        <Property Name="quarterNo" Type="Edm.Int64"/>
+        <Property Name="contractType" Type="Edm.String"/>
+        <Property Name="totalAmount" Scale="variable" Type="Edm.Decimal"/>
+        <Property Name="lineCount" Type="Edm.Int64"/>
+      </EntityType>
+      <EntityContainer Name="Entities">
+        <EntitySet EntityType="Submissions.QuarterSubmissionVE" Name="QuarterSubmission">
+          <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Insertable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Updatable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Deletable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Filterable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SortRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Sortable"/>
+            </Record>
+          </Annotation>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.TopSupported"/>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.SkipSupported"/>
+          <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Countable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Searchable"/>
+            </Record>
+          </Annotation>
+        </EntitySet>
+        <EntitySet EntityType="Submissions.QuarterSubmissionPerTypeVE" Name="QuarterSubmissionPerTypeBroken">
+          <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Insertable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Updatable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Deletable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Filterable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SortRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Sortable"/>
+            </Record>
+          </Annotation>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.TopSupported"/>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.SkipSupported"/>
+          <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Countable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Searchable"/>
+            </Record>
+          </Annotation>
+        </EntitySet>
+        <EntitySet EntityType="Submissions.QuarterSubmissionPerTypeApiVE" Name="QuarterSubmissionPerType">
+          <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Insertable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Updatable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Deletable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Filterable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SortRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Sortable"/>
+            </Record>
+          </Annotation>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.TopSupported"/>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.SkipSupported"/>
+          <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Countable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Searchable"/>
+            </Record>
+          </Annotation>
+        </EntitySet>
+        <EntitySet EntityType="Submissions.QuarterSubmissionPerTypeIdVE" Name="QuarterSubmissionPerTypeById">
+          <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Insertable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Updatable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Deletable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Filterable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SortRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Sortable"/>
+            </Record>
+          </Annotation>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.TopSupported"/>
+          <Annotation Bool="true" Term="Org.OData.Capabilities.V1.SkipSupported"/>
+          <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+            <Record>
+              <PropertyValue Bool="true" Property="Countable"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+            <Record>
+              <PropertyValue Bool="false" Property="Searchable"/>
+            </Record>
+          </Annotation>
+        </EntitySet>
+        <Annotation String="Quarterly submissions per profile, with and without a contract-type fan-out" Term="Org.OData.Core.V1.Description"/>
+        <Annotation Bool="false" Term="Org.OData.Capabilities.V1.BatchSupported"/>
+        <Annotation Bool="false" Term="Org.OData.Capabilities.V1.CrossJoinSupported"/>
+        <Annotation Bool="true" Term="Org.OData.Capabilities.V1.QuerySegmentSupported"/>
+        <Annotation Term="Org.OData.Capabilities.V1.SupportedFormats">
+          <Collection>
+            <String>application/json</String>
+          </Collection>
+        </Annotation>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

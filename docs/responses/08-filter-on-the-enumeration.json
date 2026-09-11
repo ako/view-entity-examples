@@ -1,0 +1,37 @@
+{
+    "@odata.context": "http://localhost:8080/odata/submissions/v1/$metadata#QuarterSubmissionPerTypeBroken",
+    "value": [
+        {
+            "profileNumber": 200,
+            "periodYear": 2025,
+            "quarterNo": 1,
+            "contractType": "Freelance",
+            "totalAmount": 250.0,
+            "lineCount": 1
+        },
+        {
+            "profileNumber": 200,
+            "periodYear": 2025,
+            "quarterNo": 2,
+            "contractType": "Freelance",
+            "totalAmount": 260.0,
+            "lineCount": 1
+        },
+        {
+            "profileNumber": 300,
+            "periodYear": 2025,
+            "quarterNo": 1,
+            "contractType": "Freelance",
+            "totalAmount": 55.5,
+            "lineCount": 1
+        },
+        {
+            "profileNumber": 300,
+            "periodYear": 2025,
+            "quarterNo": 2,
+            "contractType": "Freelance",
+            "totalAmount": 66.5,
+            "lineCount": 1
+        }
+    ]
+}

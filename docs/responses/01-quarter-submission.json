@@ -1,0 +1,47 @@
+{
+    "@odata.context": "http://localhost:8080/odata/submissions/v1/$metadata#QuarterSubmission",
+    "value": [
+        {
+            "profileNumber": 100,
+            "periodYear": 2025,
+            "quarterNo": 1,
+            "totalAmount": 1000.0,
+            "lineCount": 1
+        },
+        {
+            "profileNumber": 100,
+            "periodYear": 2025,
+            "quarterNo": 2,
+            "totalAmount": 1100.0,
+            "lineCount": 1
+        },
+        {
+            "profileNumber": 200,
+            "periodYear": 2025,
+            "quarterNo": 1,
+            "totalAmount": 2250.0,
+            "lineCount": 2
+        },
+        {
+            "profileNumber": 200,
+            "periodYear": 2025,
+            "quarterNo": 2,
+            "totalAmount": 2360.0,
+            "lineCount": 2
+        },
+        {
+            "profileNumber": 300,
+            "periodYear": 2025,
+            "quarterNo": 1,
+            "totalAmount": 3455.5,
+            "lineCount": 3
+        },
+        {
+            "profileNumber": 300,
+            "periodYear": 2025,
+            "quarterNo": 2,
+            "totalAmount": 3576.5,
+            "lineCount": 3
+        }
+    ]
+}
