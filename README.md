@@ -120,15 +120,18 @@ instead of 3285. Full write-up, plans and caveats in
 [5. One view entity, three groupings](docs/05-union-instead-of-parameters.md);
 requests in [`requests/trends.http`](requests/trends.http).
 
-## The explainer film
+## The explainer films
 
-[`video/`](video) builds a 4m21s narrated walkthrough of all of this —
-`view-entity-odata-key.mp4`. Domain model, the OQL and what the fan-out term
-does to it, the build error, the non-unique key, both workarounds, and then the
-SQL and the query plan the OData call actually produces.
+[`video/`](video) builds a narrated walkthrough of each example:
 
-Everything on screen comes from the captured artefacts in `docs/`, and the
-pipeline (narration first, picture timed to it) is documented in
+- **`view-entity-odata-key.mp4`** (4m21s) — domain model, the OQL and what the
+  fan-out term does to it, the build error, the non-unique key, both
+  workarounds, then the SQL and the query plan the OData call produces.
+- **`view-entity-union-grains.mp4`** — the chart's three states, the unioned
+  view, the bound-parameter subtlety, and the two query plans side by side.
+
+Everything on screen comes from the captured artefacts in `docs/`. The pipeline
+(narration first, picture timed to it, one deck per film) is documented in
 [`video/README.md`](video/README.md).
 
 ## Versions

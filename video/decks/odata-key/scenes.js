@@ -20,6 +20,7 @@ return [
   id: 'title', label: '',
   narration: "A view entity that fans out has a compound key, and one part of it is almost always an enumeration. Mendix will not let that enumeration into an OData key. Here is why, what quietly breaks if you work around it the obvious way, and what the database actually does with the fix.",
   steps: 2,
+  cues: [{"step": 1, "s": 2}],
   html: `
     <div style="margin:auto 0">
       <div class="tag">Mendix 10.24.24 &middot; view entities &middot; published OData</div>
@@ -38,6 +39,7 @@ return [
   id: 'model', label: 'Domain model',
   narration: "The domain model is ordinary. A profile holds contracts. Every contract has a type, and that type is an enumeration: permanent, temporary or freelance. Submission lines hang off a contract, one per quarter. Three persistable entities, two associations, nothing clever.",
   steps: 2,
+  cues: [{"step": 1, "s": 2}, {"step": 2, "s": 4}],
   html: `
     <h2>Three persistable entities</h2>
     <p class="sub">Module <code>Submissions</code></p>
@@ -83,6 +85,7 @@ return [
   id: 'fanout', label: 'The fan-out',
   narration: "Two view entities over the same twelve submission lines. The first gives one row per profile per quarter. Add contract type to it and profile three hundred, which holds all three types, fans out into three rows for the same quarter. Both views are correct; only the grain differs.",
   steps: 2,
+  cues: [{"step": 1, "s": 2}, {"step": 2, "s": 3}],
   html: `
     <h2>Same data, two grains</h2>
     <p class="sub">12 submission lines &middot; 3 profiles &middot; 2 quarters of 2025</p>
@@ -123,6 +126,7 @@ return [
   id: 'oql', label: 'OQL',
   narration: "The fan-out is one term in the group by. Leave contract type out and you get six rows; put it in and you get twelve. That single term is also the whole difficulty, because it is now part of what identifies a row.",
   steps: 2,
+  cues: [{"step": 2, "s": 1}, {"step": 1, "s": 2}],
   html: `
     <h2>The fan-out is one term in <span class="kw">group by</span></h2>
     <p class="sub">mdl/02-view-entities.mdl</p>
@@ -154,6 +158,7 @@ return [
   id: 'block', label: 'The constraint',
   narration: "Publish it, mark the enumeration as the fourth part of the key, and the build stops. Read the message carefully: the allowed set is stored String, Integer, Long and AutoNumber. Enumerations are not the only thing excluded. Decimal, DateTime, Boolean and any calculated attribute fail in exactly the same way.",
   steps: 2,
+  cues: [{"step": 1, "s": 0, "d": 2.4}, {"step": 2, "s": 1}],
   html: `
     <h2>Publish it &mdash; and the build stops</h2>
     <p class="sub">docs/build-error.txt &middot; Mendix 10.24.24.119653</p>
@@ -182,6 +187,7 @@ return [
   id: 'trap', label: 'The trap',
   narration: "So the obvious move is to take the enumeration out of the key and leave the other three. That builds. It is also the worst outcome available. Three rows now share one key, and asking for that key answers two hundred OK with an arbitrary one of them: fifty-five fifty, out of a quarter that totals three thousand four hundred and fifty-five fifty. Nothing in the metadata or the payload says the key is not unique.",
   steps: 3,
+  cues: [{"step": 1, "s": 2}, {"step": 2, "s": 3, "d": 3.0}, {"step": 3, "s": 4}],
   html: `
     <h2>Dropping the enumeration from the key <span class="bad">is not a workaround</span></h2>
     <p class="sub">docs/responses/03 and 04 &middot; QuarterSubmissionPerTypeBroken</p>
@@ -221,6 +227,7 @@ return [
   id: 'cast', label: 'Workaround A',
   narration: "The fix is one line of OQL. Cast the enumeration to a string. What comes back is the enumeration value name - Freelance, not its caption - as a two hundred character string, which is exactly what a key is allowed to be. Group by stays on the enumeration; the cast is an expression over a column that is already grouped.",
   steps: 2,
+  cues: [{"step": 1, "s": 1}, {"step": 2, "s": 3}],
   html: `
     <h2>Cast the enumeration to a String</h2>
     <p class="sub">mdl/02-view-entities.mdl &middot; QuarterSubmissionPerTypeApiVE</p>
@@ -260,6 +267,7 @@ return [
   id: 'keyed', label: 'The working resource',
   narration: "Publish that String as the fourth part of the key and the resource works. And look at what the URL carries: the word Freelance - the same word the body carries, because Mendix already serialises an enumeration as a string. Both properties are Edm dot String in the metadata.",
   steps: 3,
+  cues: [{"step": 1, "s": 0, "d": 2.2}, {"step": 3, "s": 1}, {"step": 2, "s": 2}],
   html: `
     <h2>The key the service will accept</h2>
     <p class="sub">docs/metadata/submissions-v1.xml &middot; docs/responses/05</p>
@@ -289,6 +297,7 @@ return [
   id: 'sql', label: 'In the database',
   narration: "Now, underneath. A view entity is not a table and nothing is materialised. One GET produces one statement: the view's OQL inlined as a derived table, and the OData query options wrapped around it. Your filter arrives as a bound parameter in the outer where clause. The cast is a plain SQL cast - the workaround costs one expression in a select list. And every key column gets a not-null guard, because a null key could not be addressed.",
   steps: 4,
+  cues: [{"step": 1, "s": 2}, {"step": 3, "s": 3}, {"step": 2, "s": 4}, {"step": 4, "s": 5}],
   html: `
     <h2>One <code>GET</code>, one statement</h2>
     <p class="sub">ConnectionBus_Retrieve at TRACE &middot; docs/sql/01-filter-pushdown.sql</p>
@@ -323,6 +332,7 @@ return [
   id: 'plan', label: 'Query plan',
   narration: "And PostgreSQL pushes that filter further than Mendix did. Watch where it lands: not on the aggregate, but on the base table scan, underneath the join. Six contracts become two before anything is joined or grouped, so four rows are aggregated instead of twelve. Notice too that contract type has dropped out of the group key - the planner knows an equality filter pinned it to a single value.",
   steps: 3,
+  cues: [{"step": 1, "s": 1, "d": 1.6}, {"step": 2, "s": 2}, {"step": 3, "s": 3, "d": 1.5}],
   html: `
     <h2>The filter lands on the base table, not on the view</h2>
     <p class="sub">EXPLAIN ANALYZE &middot; docs/sql/02-plan-with-filter.txt</p>
@@ -367,6 +377,7 @@ return [
   id: 'broken-sql', label: 'The trap, underneath',
   narration: "The non-unique key is worth one more look from down here. A request that must answer with exactly one object runs three predicates and a limit of three thousand. The database returns three rows. There is no limit one, there is no error, and no layer notices. The runtime serialises the first row it was handed.",
   steps: 2,
+  cues: [{"step": 1, "s": 2}, {"step": 2, "s": 3}],
   html: `
     <h2>What the non-unique key runs</h2>
     <p class="sub">GET QuarterSubmissionPerTypeBroken(profileNumber=300,periodYear=2025,quarterNo=1)</p>
@@ -398,6 +409,7 @@ return [
   id: 'close', label: 'Three options',
   narration: "So: a String shadow of the enumeration, which is one line of OQL and one expression in the SQL. A reference entity, if the enumeration was straining anyway. Or one composite id, when the consumer wants a single opaque key. All three are workarounds for a restriction the wire format does not need - the value is already a string in the payload, Mendix already accepts it as a string in a filter, and OData version four permits an enumeration as a key property.",
   steps: 3,
+  cues: [{"step": 1, "s": 3}, {"step": 2, "s": 3, "d": 4.0}, {"step": 3, "s": 3, "d": 8.2}],
   html: `
     <h2>Three ways to key the fan-out</h2>
     <div class="cols" style="flex:0 0 auto;margin-bottom:30px">

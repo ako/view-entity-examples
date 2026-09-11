@@ -4,7 +4,12 @@
 <link rel="stylesheet" href="style.css">
 <body>
 <div id="stage"></div>
-<script src="scenes.js"></script>
+<script>
+  // The deck is chosen by query string so one page serves every film.
+  const params = new URLSearchParams(location.search);
+  const deckName = params.get('deck') || 'odata-key';
+  document.write('<scr' + 'ipt src="decks/' + deckName + '/scenes.js"></scr' + 'ipt>');
+</script>
 <script>
   const stage = document.getElementById('stage');
   let current = -1;
@@ -25,7 +30,7 @@
     document.querySelectorAll('[data-step="' + k + '"]').forEach(el => el.classList.add('show'));
   };
 
-  const n = Number(new URLSearchParams(location.search).get('scene') || 0);
+  const n = Number(params.get('scene') || 0);
   showScene(n);
 </script>
 </body>

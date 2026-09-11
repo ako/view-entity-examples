@@ -8,14 +8,17 @@
 //
 const { execFileSync } = require('child_process');
 const fs = require('fs');
-const SCENES = require('./scenes.js');
+const path = require('path');
+const { deck } = require('./deck.js');
+const DECK = deck(process.argv);
+const SCENES = DECK.scenes;
 
 const VOICE = process.env.PIPER_VOICE ||
   '/root/.local/share/piper-voices/en_GB-cori-high.onnx';
 const LENGTH_SCALE = '1.0';   // verified by reading durations back, below
 const GAP = 0.35;             // breath between sentences
 
-const OUT = 'audio';
+const OUT = DECK.audioDir;
 fs.mkdirSync(OUT, { recursive: true });
 
 const sh = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
@@ -76,7 +79,7 @@ for (const sc of manifest) {
   }
   const parts = [];
   sc.clips.forEach((c, k) => { if (k) parts.push(silence); parts.push(c.file); });
-  fs.writeFileSync(list, parts.map(p => `file '${p.replace(/^audio\//, '')}'`).join('\n') + '\n');
+  fs.writeFileSync(list, parts.map(p => `file '${path.basename(p)}'`).join('\n') + '\n');
   const out = `${OUT}/scene-${String(sc.index).padStart(2, '0')}.wav`;
   execFileSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-f', 'concat',
     '-safe', '0', '-i', list, '-c', 'copy', out]);
@@ -85,7 +88,7 @@ for (const sc of manifest) {
   sc.gap = GAP;
 }
 
-fs.writeFileSync('audio/manifest.json', JSON.stringify(manifest, null, 2));
+fs.writeFileSync(DECK.manifest, JSON.stringify(manifest, null, 2));
 const total = manifest.reduce((a, s) => a + s.sec, 0);
 console.log(`\n${manifest.length} scenes, ${manifest.reduce((a,s)=>a+s.clips.length,0)} clips, ` +
             `${(total / 60).toFixed(2)} min of narration`);

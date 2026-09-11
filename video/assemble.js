@@ -10,12 +10,14 @@
 const { execFileSync, spawnSync } = require('child_process');
 const fs = require('fs');
 
+const { deck } = require('./deck.js');
+const DECK = deck(process.argv);
 const TAIL = 0.9;
-const OUT = 'capture/out';
+const OUT = DECK.outDir;
 fs.mkdirSync(OUT, { recursive: true });
 
-const manifest = JSON.parse(fs.readFileSync('audio/manifest.json', 'utf8'));
-const anchors = JSON.parse(fs.readFileSync('capture/clips.json', 'utf8'));
+const manifest = JSON.parse(fs.readFileSync(DECK.manifest, 'utf8'));
+const anchors = JSON.parse(fs.readFileSync(DECK.clipsJson, 'utf8'));
 const dur = f => parseFloat(execFileSync('ffprobe',
   ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', f],
   { encoding: 'utf8' }).trim());
@@ -23,8 +25,8 @@ const dur = f => parseFloat(execFileSync('ffprobe',
 const parts = [];
 for (const sc of manifest) {
   const n = String(sc.index).padStart(2, '0');
-  const vin = `capture/clips/scene-${n}.webm`;
-  const ain = `audio/scene-${n}.wav`;
+  const vin = `${DECK.clipDir}/scene-${n}.webm`;
+  const ain = `${DECK.audioDir}/scene-${n}.wav`;
   const out = `${OUT}/scene-${n}.mp4`;
   const target = sc.sec + TAIL;
   const have = dur(vin);
@@ -59,25 +61,26 @@ for (const sc of manifest) {
   parts.push(out);
 }
 
-fs.writeFileSync(`${OUT}/list.txt`, parts.map(p => `file '${p.replace(/^capture\/out\//, '')}'`).join('\n') + '\n');
+fs.writeFileSync(`${OUT}/list.txt`, parts.map(p => `file '${require('path').basename(p)}'`).join('\n') + '\n');
 execFileSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-f', 'concat', '-safe', '0',
   '-i', `${OUT}/list.txt`, '-c', 'copy', '-movflags', '+faststart',
-  'view-entity-odata-key.mp4']);
+  DECK.output]);
 
 // Look at what was actually filmed. Spot-checking two clips is how a wrong
 // offset survives three rounds of cuts; one frame from the middle of EVERY clip
 // is cheap and catches a scene that recorded blank or landed on the wrong step.
-fs.mkdirSync('capture/sheet', { recursive: true });
+const sheetDir = `capture/${DECK.name}/sheet`;
+fs.mkdirSync(sheetDir, { recursive: true });
 parts.forEach((p, i) => {
   const mid = dur(p) / 2;
   execFileSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-ss', String(mid),
     '-i', p, '-frames:v', '1', '-vf', 'scale=640:-1',
-    `capture/sheet/${String(i).padStart(2, '0')}.png`]);
+    `${sheetDir}/${String(i).padStart(2, '0')}.png`]);
 });
 execFileSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-pattern_type', 'glob',
-  '-i', 'capture/sheet/*.png', '-filter_complex', 'tile=3x4', 'capture/contact-sheet.png']);
+  '-i', `${sheetDir}/*.png`, '-filter_complex', `tile=3x${Math.ceil(parts.length / 3)}`, DECK.sheet]);
 
-const total = dur('view-entity-odata-key.mp4');
-console.log(`\nview-entity-odata-key.mp4  ${Math.floor(total / 60)}m ${(total % 60).toFixed(0)}s  ` +
-  `${(fs.statSync('view-entity-odata-key.mp4').size / 1e6).toFixed(1)} MB`);
-console.log('contact sheet: capture/contact-sheet.png');
+const total = dur(DECK.output);
+console.log(`\n${DECK.output}  ${Math.floor(total / 60)}m ${(total % 60).toFixed(0)}s  ` +
+  `${(fs.statSync(DECK.output).size / 1e6).toFixed(1)} MB`);
+console.log(`contact sheet: ${DECK.sheet}`);

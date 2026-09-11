@@ -12,35 +12,25 @@
 //
 const { chromium } = require('playwright');
 const narrate = require('./narrate.js');
+const { deck } = require('./deck.js');
 const fs = require('fs');
 const path = require('path');
 
 const SIZE = { width: 1920, height: 1080 };
 const TAIL = 0.9;          // let the last caption land before the cut
-const RAW = 'capture/raw';
-const CLIPS = 'capture/clips';
+const DECK = deck(process.argv);
+const RAW = DECK.rawDir;
+const CLIPS = DECK.clipDir;
 
-// Which reveal belongs to which sentence. Authored, not derived: a step that
-// lands one sentence early shows the viewer the answer before the question.
-// { step, s: sentence index, d: seconds after that sentence starts }
-const CUES = {
-  'title':      [{ step: 1, s: 2 }],
-  'model':      [{ step: 1, s: 2 }, { step: 2, s: 4 }],
-  'fanout':     [{ step: 1, s: 2 }, { step: 2, s: 3 }],
-  'oql':        [{ step: 2, s: 1 }, { step: 1, s: 2 }],
-  'block':      [{ step: 1, s: 0, d: 2.4 }, { step: 2, s: 1 }],
-  'trap':       [{ step: 1, s: 2 }, { step: 2, s: 3, d: 3.0 }, { step: 3, s: 4 }],
-  'cast':       [{ step: 1, s: 1 }, { step: 2, s: 3 }],
-  'keyed':      [{ step: 1, s: 0, d: 2.2 }, { step: 3, s: 1 }, { step: 2, s: 2 }],
-  'sql':        [{ step: 1, s: 2 }, { step: 3, s: 3 }, { step: 2, s: 4 }, { step: 4, s: 5 }],
-  'plan':       [{ step: 1, s: 1, d: 1.6 }, { step: 2, s: 2 }, { step: 3, s: 3, d: 1.5 }],
-  'broken-sql': [{ step: 1, s: 2 }, { step: 2, s: 3 }],
-  'close':      [{ step: 1, s: 3 }, { step: 2, s: 3, d: 4.0 }, { step: 3, s: 3, d: 8.2 }],
-};
+// Reveals are cued per scene, in decks/<name>/scenes.js: { step, s: sentence
+// index, d: seconds after that sentence starts }. Authored, not derived - a
+// step that lands one sentence early shows the viewer the answer before the
+// question.
 
 (async () => {
-  const manifest = JSON.parse(fs.readFileSync('audio/manifest.json', 'utf8'));
-  const only = process.argv[2] ? Number(process.argv[2]) : null;
+  const manifest = JSON.parse(fs.readFileSync(DECK.manifest, 'utf8'));
+  const scene = process.argv.find((a, i) => /^\d+$/.test(a) && process.argv[i - 1] !== '--deck');
+  const only = scene !== undefined ? Number(scene) : null;
   fs.mkdirSync(RAW, { recursive: true });
   fs.mkdirSync(CLIPS, { recursive: true });
 
@@ -67,7 +57,7 @@ const CUES = {
       events.push({ t, kind: 'caption', text: c.text });
       t += c.sec + (j < sc.clips.length - 1 ? sc.gap : 0);
     });
-    for (const cue of (CUES[sc.id] || [])) {
+    for (const cue of (DECK.scenes[sc.index].cues || [])) {
       const at = starts[Math.min(cue.s, starts.length - 1)] + (cue.d || 0);
       events.push({ t: Math.min(at, t - 0.2), kind: 'step', step: cue.step });
     }
@@ -84,7 +74,7 @@ const CUES = {
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
-    await page.goto(`${url}?scene=${sc.index}`);
+    await page.goto(`${url}?deck=${DECK.name}&scene=${sc.index}`);
     await page.waitForTimeout(500);          // let the scene's fade-in finish
     await narrate.install(page);
 
@@ -134,7 +124,7 @@ const CUES = {
   }
 
   await browser.close();
-  fs.writeFileSync('capture/clips.json', JSON.stringify(report, null, 2));
+  fs.writeFileSync(DECK.clipsJson, JSON.stringify(report, null, 2));
   const bad = report.filter(r => r.video < r.audio);
   if (bad.length) {
     console.error(`\n${bad.length} clip(s) shorter than their narration: ` +

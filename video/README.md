@@ -1,10 +1,15 @@
-# The explainer film
+# The explainer films
 
-A 4m21s narrated walkthrough of why a fan-out view entity cannot carry an
-enumeration in its OData key, what breaks if you route around it carelessly, and
-what the database actually does with the fix.
+Two narrated walkthroughs, built from the same pipeline. A **deck** is a
+directory under `decks/` holding what is said and shown; everything else - the
+caption overlay, the stylesheet, the timing rules - is shared.
 
-Output: **`view-entity-odata-key.mp4`** (1920×1080, AAC narration).
+| deck | film | |
+|---|---|---|
+| `odata-key` | `view-entity-odata-key.mp4` | why a fan-out view entity cannot carry an enumeration in its OData key, what breaks if you route around it, and what the database does with the fix |
+| `union-grains` | `view-entity-union-grains.mp4` | three groupings in one unioned view entity instead of a parameter, and the query plans that make it work |
+
+Both are 1920×1080 with AAC narration.
 
 Everything on screen is copied from this repo's captured artefacts —
 `docs/build-error.txt`, `docs/responses/`, `docs/metadata/`, `docs/sql/` — not
@@ -15,15 +20,16 @@ and its PostgreSQL actually produced.
 
 ```bash
 cd video
-npm install                 # playwright (the browser itself is already in the image)
-node build-audio.js         # narration first — every hold downstream is a measured duration
-node record.js              # one clip per scene, timed from that audio
-node assemble.js            # mux, join, and write the contact sheet
+npm install                                  # playwright (the browser is already in the image)
+node build-audio.js --deck union-grains      # narration first - every hold downstream is measured
+node record.js     --deck union-grains       # one clip per scene, timed from that audio
+node assemble.js   --deck union-grains       # mux, join, and write the contact sheet
 ```
 
-`node preview.js` renders every scene as a still with all reveals shown — the
-cheap way to catch text overflowing 1080p before recording five minutes of it.
-`node record.js 8` re-records one scene.
+`--deck` defaults to `odata-key`. `node preview.js --deck <name>` renders every
+scene as a still with all reveals shown — the cheap way to catch text
+overflowing 1080p before recording minutes of it. `node record.js --deck <name> 8`
+re-records one scene.
 
 ## Why it is built this way
 
@@ -57,10 +63,12 @@ there is no cumulative drift to model and a re-record costs one scene.
 
 | | |
 |---|---|
-| `scenes.js` | what is on screen and what is said, one entry per scene |
-| `shell.html`, `style.css` | the deck — `?scene=N`, `showStep(k)` |
+| `decks/<name>/scenes.js` | what is on screen, what is said, and when each reveal fires |
+| `decks/<name>/deck.json` | the film's title and output filename |
+| `deck.js` | resolves `--deck` to its scenes and its audio/capture directories |
+| `shell.html`, `style.css` | the page — `?deck=<name>&scene=N`, `showStep(k)` |
 | `narrate.js` | the caption bar, copied from the mxcli skill, unmodified |
 | `build-audio.js` | Piper → two-pass loudnorm → `audio/manifest.json` |
-| `record.js` | one clip per scene; the cue table lives here |
+| `record.js` | one clip per scene, both clock anchors recorded |
 | `assemble.js` | mux, concat, contact sheet |
 | `preview.js` | stills, for layout |

@@ -65,3 +65,17 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .dm .lbl{position:absolute;font-size:16px;color:var(--dim);background:var(--bg);padding:2px 8px}
 .callout{position:absolute;background:#08243a;border:1px solid #14405c;border-radius:10px;
          padding:12px 16px;font-size:20px;color:#bfe6fb;max-width:330px}
+
+/* ---- charts (single series: no legend, the title names it) ---- */
+.chart{--series-1:#3987e5}
+.chart .bars{display:flex;align-items:flex-end;gap:2px;height:190px;margin:6px 0 0}
+.chart .bars i{display:block;flex:1 1 0;min-width:3px;background:var(--series-1);
+               border-radius:4px 4px 0 0}
+.chart .xa{display:flex;justify-content:space-between;border-top:1px solid var(--line);
+           padding-top:8px;margin-top:0;font-size:16px;color:var(--faint)}
+.chart .peak{font-size:17px;color:var(--dim);margin-top:10px}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);
+     border-radius:10px;overflow:hidden;margin-bottom:10px}
+.seg span{padding:9px 22px;font-size:20px;color:var(--dim);border-right:1px solid var(--line)}
+.seg span:last-child{border-right:0}
+.seg span.on{background:#12304d;color:#cfe9fb;font-weight:600}
