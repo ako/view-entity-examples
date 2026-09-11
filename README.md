@@ -127,7 +127,7 @@ requests in [`requests/trends.http`](requests/trends.http).
 - **`view-entity-odata-key.mp4`** (4m21s) — domain model, the OQL and what the
   fan-out term does to it, the build error, the non-unique key, both
   workarounds, then the SQL and the query plan the OData call produces.
-- **`view-entity-union-grains.mp4`** — the chart's three states, the unioned
+- **`view-entity-union-grains.mp4`** (2m56s) — the chart's three states, the unioned
   view, the bound-parameter subtlety, and the two query plans side by side.
 
 Everything on screen comes from the captured artefacts in `docs/`. The pipeline
