@@ -1,0 +1,14 @@
+-- One after-startup microflow that seeds both examples.
+--
+-- It must return TRUE: an after-startup microflow that returns false makes the
+-- runtime treat startup as failed and the app never comes up.
+
+create or modify microflow Submissions.ASu_Startup ()
+  returns Boolean as $Started
+begin
+  $Seeded = call microflow Submissions.ASu_CreateDemoData();
+  $Trends = call microflow Trends.ASu_CreateTrendData();
+  return true;
+end;
+
+alter settings model AfterStartupMicroflow = 'Submissions.ASu_Startup';

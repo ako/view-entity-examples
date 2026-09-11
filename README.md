@@ -1,8 +1,17 @@
-# View entities, fan-out, and the OData key
+# View entity examples
 
-A small Mendix app that shows what happens when a view entity fans out and one
-part of its natural key is an enumeration — and three ways to publish it as an
-OData resource anyway.
+One Mendix app (10.24.24), two worked examples about publishing view entities
+over OData. Every error message, payload, SQL statement and query plan in
+`docs/` was captured from the running app.
+
+| | |
+|---|---|
+| **1. The fan-out and the OData key** | A view entity that fans out has a compound key whose last part is an enumeration — which a published OData resource will not accept. What breaks if you route around it, and three workarounds. [docs 1–4](docs) |
+| **2. Three groupings without parameters** | A chart that switches between week, month and quarter, built as one unioned view entity with a `Grain` column instead of a parameterised view. The database only executes the branch you filter for. [docs 5](docs/05-union-instead-of-parameters.md) |
+
+---
+
+## Example 1 — the fan-out and the OData key
 
 The case: a profile has one submission per quarter (`QuarterSubmissionVE`), and
 the same submission broken down per contract type
@@ -77,14 +86,50 @@ All four are in one service at `odata/submissions/v1/`, over the same data.
 
 ```
 app/     the Mendix project
-mdl/     the MDL that builds it, in order - 01 domain, 02 view entities,
-         03 the published service, 04 demo data, 99 the blocked key
+mdl/     the MDL that builds it, in order
+         01-04  example 1: domain, view entities, service, demo data
+         10-14  example 2: trends domain, unioned view, service, data, startup
+         99     the blocked key, applied on purpose to reproduce the error
 docs/    the write-up, the captured build error, $metadata and responses
 requests/ .http files against the running app
 ```
 
 Every model change is in [`mdl/`](mdl); the app can be rebuilt from an empty
 project by running those scripts in order with `mxcli exec`.
+
+## Example 2 — three groupings, one view entity, no parameters
+
+A chart that lets the user pick week, month or quarter is the case people
+usually want view-entity parameters for. It does not need them: union the three
+groupings and carry a `Grain` column saying which branch a row came from.
+
+```
+GET .../UsageTrend?$filter=grain eq 'Month' and meterCode eq 'M-001'
+```
+
+The interesting part is what PostgreSQL does with it. Mendix binds the branch
+discriminators as parameters (`SELECT ? AS "Grain"`), so the pruning question is
+about `$1 = $7`, not about folding string literals — and it prunes either way:
+
+- on a **custom plan**, the unused branches collapse to `One-Time Filter: false`
+- on a **generic plan** the comparison is evaluated once per execution instead,
+  and every scan underneath reports `never executed`
+
+Measured: 1.9 ms for one grain against 5.3 ms for all three, scanning 1095 rows
+instead of 3285. Full write-up, plans and caveats in
+[5. One view entity, three groupings](docs/05-union-instead-of-parameters.md);
+requests in [`requests/trends.http`](requests/trends.http).
+
+## The explainer film
+
+[`video/`](video) builds a 4m21s narrated walkthrough of all of this —
+`view-entity-odata-key.mp4`. Domain model, the OQL and what the fan-out term
+does to it, the build error, the non-unique key, both workarounds, and then the
+SQL and the query plan the OData call actually produces.
+
+Everything on screen comes from the captured artefacts in `docs/`, and the
+pipeline (narration first, picture timed to it) is documented in
+[`video/README.md`](video/README.md).
 
 ## Versions
 
@@ -107,14 +152,3 @@ mxcli new MyApp --version 10.24.24.119653
 
 (`--theme none --layout none` on Mendix 10 — mxcli's generated layout uses
 design properties Atlas 10 does not carry.)
-
-## The explainer film
-
-[`video/`](video) builds a 4m21s narrated walkthrough of all of this —
-`view-entity-odata-key.mp4`. Domain model, the OQL and what the fan-out term
-does to it, the build error, the non-unique key, both workarounds, and then the
-SQL and the query plan the OData call actually produces.
-
-Everything on screen comes from the captured artefacts in `docs/`, and the
-pipeline (narration first, picture timed to it) is documented in
-[`video/README.md`](video/README.md).

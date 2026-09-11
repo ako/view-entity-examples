@@ -1,0 +1,41 @@
+{
+    "@odata.context": "http://localhost:8080/odata/trends/v1/$metadata#UsageTrend",
+    "value": [
+        {
+            "grain": "Month",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 1,
+            "label": "2023-M1",
+            "totalKwh": 456.0,
+            "readingCount": 31
+        },
+        {
+            "grain": "Month",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 2,
+            "label": "2023-M2",
+            "totalKwh": 415.0,
+            "readingCount": 28
+        },
+        {
+            "grain": "Month",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 3,
+            "label": "2023-M3",
+            "totalKwh": 470.0,
+            "readingCount": 31
+        },
+        {
+            "grain": "Month",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 4,
+            "label": "2023-M4",
+            "totalKwh": 454.0,
+            "readingCount": 30
+        }
+    ]
+}

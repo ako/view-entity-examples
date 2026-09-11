@@ -1,0 +1,113 @@
+{
+    "@odata.context": "http://localhost:8080/odata/trends/v1/$metadata#UsageTrend",
+    "value": [
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 1,
+            "label": "2023-Q1",
+            "totalKwh": 1341.0,
+            "readingCount": 90
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 2,
+            "label": "2023-Q2",
+            "totalKwh": 1359.0,
+            "readingCount": 91
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 3,
+            "label": "2023-Q3",
+            "totalKwh": 1386.0,
+            "readingCount": 92
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2023,
+            "periodNo": 4,
+            "label": "2023-Q4",
+            "totalKwh": 1380.0,
+            "readingCount": 92
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2024,
+            "periodNo": 1,
+            "label": "2024-Q1",
+            "totalKwh": 1359.0,
+            "readingCount": 91
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2024,
+            "periodNo": 2,
+            "label": "2024-Q2",
+            "totalKwh": 1368.0,
+            "readingCount": 91
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2024,
+            "periodNo": 3,
+            "label": "2024-Q3",
+            "totalKwh": 1387.0,
+            "readingCount": 92
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2024,
+            "periodNo": 4,
+            "label": "2024-Q4",
+            "totalKwh": 1370.0,
+            "readingCount": 92
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2025,
+            "periodNo": 1,
+            "label": "2025-Q1",
+            "totalKwh": 1351.0,
+            "readingCount": 90
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2025,
+            "periodNo": 2,
+            "label": "2025-Q2",
+            "totalKwh": 1374.0,
+            "readingCount": 91
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2025,
+            "periodNo": 3,
+            "label": "2025-Q3",
+            "totalKwh": 1373.0,
+            "readingCount": 92
+        },
+        {
+            "grain": "Quarter",
+            "meterCode": "M-001",
+            "periodYear": 2025,
+            "periodNo": 4,
+            "label": "2025-Q4",
+            "totalKwh": 1362.0,
+            "readingCount": 91
+        }
+    ]
+}

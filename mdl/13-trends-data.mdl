@@ -1,0 +1,39 @@
+-- Three years of daily readings for six meters: 6 x 1095 = 6570 rows.
+--
+-- Enough that the query plan has something to say. Readings are committed one
+-- meter at a time as a list rather than per object - 6570 individual commits is
+-- the difference between a few seconds and a coffee.
+
+create or modify microflow Trends.ASu_CreateTrendData ()
+  returns Boolean as $Done
+begin
+  retrieve $ExistingMeters from Trends.Meter;
+  $MeterCount = count($ExistingMeters);
+  if $MeterCount = 0 then
+    declare $Start DateTime = addYears([%BeginOfCurrentYear%], -3);
+    declare $M Integer = 1;
+    while $M <= 6 begin
+      $Meter = create Trends.Meter (
+        MeterCode = 'M-' + formatDecimal($M, '000'),
+        Region = 'Region ' + toString($M)
+      ) commit;
+
+      $Readings = create list of Trends.Reading;
+      declare $D Integer = 0;
+      while $D < 1095 begin
+        $Reading = create Trends.Reading (
+          ReadAt = addDays($Start, $D),
+          Kwh = 8 + ($D mod 11) + ($M * 2),
+          Trends.Reading_Meter = $Meter
+        );
+        add $Reading to $Readings;
+        $D = $D + 1;
+      end while;
+      commit $Readings;
+
+      $M = $M + 1;
+    end while;
+    log info node 'Trends' 'Trend demo data created: 6 meters, 6570 readings';
+  end if;
+  return true;
+end;

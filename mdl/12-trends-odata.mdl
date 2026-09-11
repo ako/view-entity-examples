@@ -1,0 +1,34 @@
+-- The chart's API. One resource; the grouping is a filter, not a parameter.
+--
+--   GET .../UsageTrend?$filter=grain eq 'Month' and meterCode eq 'M-001'
+--                     &$orderby=periodYear,periodNo
+--
+-- Key: grain + meterCode + periodYear + periodNo. All String and Integer,
+-- which is what a published key is allowed to be.
+
+create or modify odata service Trends.TrendsApi (
+  path: 'odata/trends/v1/',
+  version: '1.0.0',
+  ODataVersion: OData4,
+  namespace: 'Trends',
+  ServiceName: 'TrendsApi',
+  Summary: 'Usage per meter, grouped by week, month or quarter'
+)
+authentication basic
+{
+  publish entity Trends.UsageTrendVE as 'UsageTrend' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    Grain        as 'grain'        (key, Filterable, Sortable),
+    MeterCode    as 'meterCode'    (key, Filterable, Sortable),
+    PeriodYear   as 'periodYear'   (key, Filterable, Sortable),
+    PeriodNo     as 'periodNo'     (key, Filterable, Sortable),
+    Label        as 'label'        (Filterable, Sortable),
+    TotalKwh     as 'totalKwh'     (Filterable, Sortable),
+    ReadingCount as 'readingCount' (Filterable, Sortable)
+  );
+};

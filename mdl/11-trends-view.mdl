@@ -1,0 +1,60 @@
+-- One view entity, three groupings, no parameters.
+--
+-- The chart lets the user pick week, month or quarter. The reflex is to ask for
+-- a parameterised view entity. Instead: union the three groupings into one view
+-- and carry a Grain column that says which branch a row came from. The consumer
+-- filters on Grain.
+--
+-- Grain is a String, not an Enumeration, for the reason example 1 is about: an
+-- enumeration cannot be part of a published OData key.
+
+@position(100, 400)
+create or modify view entity Trends.UsageTrendVE (
+  Grain: String(200),
+  MeterCode: String(20),
+  PeriodYear: Integer,
+  PeriodNo: Integer,
+  Label: String(200),
+  TotalKwh: Decimal,
+  ReadingCount: Integer
+) as (
+  select 'Week'                                as Grain
+  ,      m.MeterCode                           as MeterCode
+  ,      datepart(YEAR, r.ReadAt)              as PeriodYear
+  ,      datepart(WEEK, r.ReadAt)              as PeriodNo
+  ,      cast(datepart(YEAR, r.ReadAt) as string) + '-W'
+         + cast(datepart(WEEK, r.ReadAt) as string)   as Label
+  ,      sum(r.Kwh)                            as TotalKwh
+  ,      count(r.ID)                           as ReadingCount
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.MeterCode, datepart(YEAR, r.ReadAt), datepart(WEEK, r.ReadAt)
+
+  union all
+
+  select 'Month'                               as Grain
+  ,      m.MeterCode                           as MeterCode
+  ,      datepart(YEAR, r.ReadAt)              as PeriodYear
+  ,      datepart(MONTH, r.ReadAt)             as PeriodNo
+  ,      cast(datepart(YEAR, r.ReadAt) as string) + '-M'
+         + cast(datepart(MONTH, r.ReadAt) as string)  as Label
+  ,      sum(r.Kwh)                            as TotalKwh
+  ,      count(r.ID)                           as ReadingCount
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.MeterCode, datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
+
+  union all
+
+  select 'Quarter'                             as Grain
+  ,      m.MeterCode                           as MeterCode
+  ,      datepart(YEAR, r.ReadAt)              as PeriodYear
+  ,      datepart(QUARTER, r.ReadAt)           as PeriodNo
+  ,      cast(datepart(YEAR, r.ReadAt) as string) + '-Q'
+         + cast(datepart(QUARTER, r.ReadAt) as string) as Label
+  ,      sum(r.Kwh)                            as TotalKwh
+  ,      count(r.ID)                           as ReadingCount
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.MeterCode, datepart(YEAR, r.ReadAt), datepart(QUARTER, r.ReadAt)
+);

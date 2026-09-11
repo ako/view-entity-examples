@@ -1,0 +1,28 @@
+# Example 2: one view entity, three groupings, no parameters.
+#
+#   cd app && ./mxcli run --local --ensure-db -p ViewEntityExamples.mpr
+#
+# See requests/submissions.http for how to send a .http file.
+
+@base = http://localhost:8080/odata/trends/v1
+
+### The whole view - every grain at once (204 rows for one meter)
+GET {{base}}/UsageTrend?$filter=meterCode eq 'M-001'
+
+### What the chart asks for when the user picks "week"
+GET {{base}}/UsageTrend?$filter=grain eq 'Week' and meterCode eq 'M-001'&$orderby=periodYear,periodNo
+
+### ...and "month". Same statement, different bind value.
+GET {{base}}/UsageTrend?$filter=grain eq 'Month' and meterCode eq 'M-001'&$orderby=periodYear,periodNo
+
+### ...and "quarter"
+GET {{base}}/UsageTrend?$filter=grain eq 'Quarter' and meterCode eq 'M-001'&$orderby=periodYear,periodNo
+
+### Two grains at once - something a parameter could not give you
+GET {{base}}/UsageTrend?$filter=(grain eq 'Quarter' or grain eq 'Month') and meterCode eq 'M-001'&$orderby=periodYear,periodNo
+
+### One row by key: grain + meter + year + period
+GET {{base}}/UsageTrend(grain='Quarter',meterCode='M-001',periodYear=2025,periodNo=2)
+
+### All meters, one grain - the cross-meter comparison chart
+GET {{base}}/UsageTrend?$filter=grain eq 'Quarter' and periodYear eq 2025&$orderby=meterCode,periodNo

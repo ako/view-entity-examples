@@ -1,0 +1,28 @@
+-- Example 2: one view entity that carries several groupings at once.
+--
+-- Energy readings per meter. The chart wants to show usage by week, by month
+-- or by quarter, with the grouping chosen at runtime - the case people usually
+-- reach for view-entity parameters to solve.
+
+create module Trends;
+
+@position(100, 100)
+create persistent entity Trends.Meter (
+  MeterCode: String(20),
+  Region: String(40)
+)
+index (MeterCode);
+
+@position(450, 100)
+create persistent entity Trends.Reading (
+  ReadAt: DateTime,
+  Kwh: Decimal
+);
+
+create association Trends.Reading_Meter
+  from Trends.Reading to Trends.Meter
+  type Reference
+  owner Default
+  delete_behavior CASCADE;
+
+create index IdxReadingReadAt on Trends.Reading (ReadAt);

@@ -1,0 +1,39 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=36 loops=1)
+   ->  Merge Append (actual rows=36 loops=1)
+         Sort Key: ((EXTRACT(year FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(week FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+         ->  GroupAggregate (actual rows=0 loops=1)
+               Group Key: metercode, ((EXTRACT(year FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(week FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+               ->  Sort (actual rows=0 loops=1)
+                     Sort Key: metercode, ((EXTRACT(year FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(week FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+                     Sort Method: quicksort  Memory: 25kB
+                     ->  Result (actual rows=0 loops=1)
+                           One-Time Filter: false
+         ->  GroupAggregate (actual rows=36 loops=1)
+               Group Key: ((EXTRACT(year FROM ((r.readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(month FROM ((r.readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+               ->  Sort (actual rows=1095 loops=1)
+                     Sort Key: ((EXTRACT(year FROM ((r.readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(month FROM ((r.readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+                     Sort Method: quicksort  Memory: 117kB
+                     ->  Nested Loop (actual rows=1095 loops=1)
+                           ->  Bitmap Heap Scan on "trends$meter" m (actual rows=1 loops=1)
+                                 Recheck Cond: ((metercode IS NOT NULL) AND ((metercode)::text = 'M-001'::text))
+                                 Heap Blocks: exact=1
+                                 ->  Bitmap Index Scan on "idx_trends$meter_metercode_asc" (actual rows=1 loops=1)
+                                       Index Cond: ((metercode IS NOT NULL) AND ((metercode)::text = 'M-001'::text))
+                           ->  Bitmap Heap Scan on "trends$reading" r (actual rows=1095 loops=1)
+                                 Recheck Cond: ("trends$reading_meter" = m.id)
+                                 Filter: (((EXTRACT(year FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer IS NOT NULL) AND ((EXTRACT(month FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer IS NOT NULL))
+                                 Heap Blocks: exact=9
+                                 ->  Bitmap Index Scan on "idx_trends$reading_trends$reading_meter" (actual rows=1095 loops=1)
+                                       Index Cond: ("trends$reading_meter" = m.id)
+         ->  GroupAggregate (actual rows=0 loops=1)
+               Group Key: metercode, ((EXTRACT(year FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(quarter FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+               ->  Sort (actual rows=0 loops=1)
+                     Sort Key: metercode, ((EXTRACT(year FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer), ((EXTRACT(quarter FROM ((readat AT TIME ZONE 'UTC'::text) AT TIME ZONE 'UTC'::text)))::integer)
+                     Sort Method: quicksort  Memory: 25kB
+                     ->  Result (actual rows=0 loops=1)
+                           One-Time Filter: false
+ Planning Time: 1.358 ms
+ Execution Time: 1.930 ms
+(36 rows)
+
