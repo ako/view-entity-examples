@@ -2,7 +2,7 @@
 
 - **Widget ID:** `com.mendix.widget.web.barcodescanner.BarcodeScanner`
 - **Type:** PLUGGABLEWIDGET
-- **Version:** 2.5.0
+- **Version:** 2.4.2
 
 ## MDL Example
 
@@ -24,7 +24,6 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.barcodescanner.BarcodeScanner' widget1
 | `width` | integer | Yes | 100 |  | Dimensions::Dimensions | Width |
 | `heightUnit` | enumeration | Yes | percentageOfWidth | `percentageOfWidth` \| `pixels` \| `percentageOfParent` | Dimensions::Dimensions | Height unit |
 | `height` | integer | Yes | 75 |  | Dimensions::Dimensions | Height |
-| `detectionLogic` | enumeration | Yes | native | `zxing` \| `native` | Advanced | Choose the detection logic to use for barcode scanning. |
 
 ---
 

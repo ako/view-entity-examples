@@ -2,7 +2,7 @@
 
 - **Widget ID:** `com.mendix.widget.web.heatmap.HeatMap`
 - **Type:** PLUGGABLEWIDGET
-- **Version:** 6.2.1
+- **Version:** 6.2.0
 
 ## MDL Example
 
@@ -21,7 +21,6 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.heatmap.HeatMap' widget1 {
 |----------|------|----------|---------|----------------|-------|-------------|
 | `seriesDataSource` | datasource | Yes |  | list | General::Data source | Series |
 | `seriesValueAttribute` | attribute | Yes |  |  | General::Data source | The attribute used to display “heat” at an “x y” location. |
-| `seriesItemSelection` | selection | Yes |  |  | General::Data source | Selection type |
 | `horizontalAxisAttribute` | attribute |  |  |  | General::Axis | X Axis Attribute |
 | `horizontalSortAttribute` | attribute |  |  |  | General::Axis | Attribute to use for sorting the data. Sorting can only be used when data source is ‘Database’. For data source ‘Microflow’, the sorting should be done within the microflow. |
 | `horizontalSortOrder` | enumeration | Yes | asc | `asc` \| `desc` | General::Axis | X Axis Sort Order |

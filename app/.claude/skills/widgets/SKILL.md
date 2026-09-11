@@ -1,6 +1,6 @@
 ---
 name: widgets
-description: "The pluggable and custom widgets installed in THIS project and how to write them in MDL — Badge, Badge button, Area chart, Bar chart, Bubble chart, Column chart, Custom chart, Heat map, Line chart, Pie chart, Time series, Chart playground and 30 more. Use before placing any PLUGGABLEWIDGET or CUSTOMWIDGET on a page, or when a widget's property names, enumeration values or child blocks need checking."
+description: "The pluggable and custom widgets installed in THIS project and how to write them in MDL — Badge, Badge button, Area chart, Bar chart, Bubble chart, Column chart, Custom chart, Heat map, Line chart, Pie chart, Time series, Chart playground and 31 more. Use before placing any PLUGGABLEWIDGET or CUSTOMWIDGET on a page, or when a widget's property names, enumeration values or child blocks need checking."
 ---
 
 # Widgets in this project
@@ -19,7 +19,7 @@ this page.
 | `PLUGGABLEWIDGET` | [BUBBLECHART](bubblechart.md) | `com.mendix.widget.web.bubblechart.BubbleChart` | Bubble chart | 15 |
 | `PLUGGABLEWIDGET` | [COLUMNCHART](columnchart.md) | `com.mendix.widget.web.columnchart.ColumnChart` | Column chart | 16 |
 | `PLUGGABLEWIDGET` | [CUSTOMCHART](customchart.md) | `com.mendix.widget.web.customchart.CustomChart` | Custom chart | 20 |
-| `PLUGGABLEWIDGET` | [HEATMAP](heatmap.md) | `com.mendix.widget.web.heatmap.HeatMap` | Heat map | 30 |
+| `PLUGGABLEWIDGET` | [HEATMAP](heatmap.md) | `com.mendix.widget.web.heatmap.HeatMap` | Heat map | 29 |
 | `PLUGGABLEWIDGET` | [LINECHART](linechart.md) | `com.mendix.widget.web.linechart.LineChart` | Line chart | 15 |
 | `PLUGGABLEWIDGET` | [PIECHART](piechart.md) | `com.mendix.widget.web.piechart.PieChart` | Pie chart | 22 |
 | `PLUGGABLEWIDGET` | [TIMESERIES](timeseries.md) | `com.mendix.widget.web.timeseries.TimeSeries` | Time series | 17 |
@@ -35,18 +35,19 @@ this page.
 | `PLUGGABLEWIDGET` | [FEEDBACK](feedback.md) | `com.mendix.widget.native.feedback.Feedback` | Feedback | 0 |
 | `PLUGGABLEWIDGET` | [ACCESSIBILITYHELPER](accessibilityhelper.md) | `com.mendix.widget.web.accessibilityhelper.AccessibilityHelper` | Accessibility helper | 3 |
 | `PLUGGABLEWIDGET` | [ACCORDION](accordion.md) | `com.mendix.widget.web.accordion.Accordion` | Accordion | 10 |
-| `PLUGGABLEWIDGET` | [BARCODESCANNER](barcodescanner.md) | `com.mendix.widget.web.barcodescanner.BarcodeScanner` | Barcode Scanner | 10 |
-| `PLUGGABLEWIDGET` | [COMBOBOX](combobox.md) | `com.mendix.widget.web.combobox.Combobox` | Combo box | 52 |
-| `PLUGGABLEWIDGET` | [DATAGRID](datagrid.md) | `com.mendix.widget.web.datagrid.Datagrid` | Data grid 2 | 40 |
+| `PLUGGABLEWIDGET` | [BARCODESCANNER](barcodescanner.md) | `com.mendix.widget.web.barcodescanner.BarcodeScanner` | Barcode Scanner | 9 |
+| `PLUGGABLEWIDGET` | [COMBOBOX](combobox.md) | `com.mendix.widget.web.combobox.Combobox` | Combo box | 50 |
+| `PLUGGABLEWIDGET` | [DATAGRID](datagrid.md) | `com.mendix.widget.web.datagrid.Datagrid` | Data grid 2 | 36 |
 | `PLUGGABLEWIDGET` | [DATAGRIDDATEFILTER](datagriddatefilter.md) | `com.mendix.widget.web.datagriddatefilter.DatagridDateFilter` | Date filter | 16 |
-| `PLUGGABLEWIDGET` | [DATAGRIDDROPDOWNFILTER](datagriddropdownfilter.md) | `com.mendix.widget.web.datagriddropdownfilter.DatagridDropdownFilter` | Drop-down filter | 25 |
+| `PLUGGABLEWIDGET` | [DATAGRIDDROPDOWNFILTER](datagriddropdownfilter.md) | `com.mendix.widget.web.datagriddropdownfilter.DatagridDropdownFilter` | Drop-down filter | 23 |
 | `PLUGGABLEWIDGET` | [DATAGRIDNUMBERFILTER](datagridnumberfilter.md) | `com.mendix.widget.web.datagridnumberfilter.DatagridNumberFilter` | Number filter | 12 |
 | `PLUGGABLEWIDGET` | [DATAGRIDTEXTFILTER](datagridtextfilter.md) | `com.mendix.widget.web.datagridtextfilter.DatagridTextFilter` | Text filter | 12 |
 | `PLUGGABLEWIDGET` | [DROPDOWNSORT](dropdownsort.md) | `com.mendix.widget.web.dropdownsort.DropdownSort` | Drop-down sort | 5 |
 | `PLUGGABLEWIDGET` | [FIELDSET](fieldset.md) | `com.mendix.widget.web.fieldset.Fieldset` | Fieldset | 2 |
-| `PLUGGABLEWIDGET` | [GALLERY](gallery.md) | `com.mendix.widget.web.gallery.Gallery` | Gallery | 33 |
+| `PLUGGABLEWIDGET` | [FILEUPLOADER](fileuploader.md) | `com.mendix.widget.web.fileuploader.FileUploader` | File uploader | 26 |
+| `PLUGGABLEWIDGET` | [GALLERY](gallery.md) | `com.mendix.widget.web.gallery.Gallery` | Gallery | 23 |
 | `PLUGGABLEWIDGET` | [HTMLELEMENT](htmlelement.md) | `com.mendix.widget.web.htmlelement.HTMLElement` | HTML Element | 12 |
-| `PLUGGABLEWIDGET` | [IMAGE](image.md) | `com.mendix.widget.web.image.Image` | Image | 21 |
+| `PLUGGABLEWIDGET` | [IMAGE](image.md) | `com.mendix.widget.web.image.Image` | Image | 17 |
 | `PLUGGABLEWIDGET` | [LANGUAGESELECTOR](languageselector.md) | `com.mendix.widget.web.languageselector.LanguageSelector` | Language selector | 6 |
 | `PLUGGABLEWIDGET` | [POPUPMENU](popupmenu.md) | `com.mendix.widget.web.popupmenu.PopupMenu` | Pop-up menu | 9 |
 | `PLUGGABLEWIDGET` | [SELECTIONHELPER](selectionhelper.md) | `com.mendix.widget.web.selectionhelper.SelectionHelper` | Selection helper | 5 |

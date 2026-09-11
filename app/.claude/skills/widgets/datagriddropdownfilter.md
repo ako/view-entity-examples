@@ -2,7 +2,7 @@
 
 - **Widget ID:** `com.mendix.widget.web.datagriddropdownfilter.DatagridDropdownFilter`
 - **Type:** PLUGGABLEWIDGET
-- **Version:** 3.4.0
+- **Version:** 3.0.2
 
 ## MDL Example
 
@@ -38,9 +38,7 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.datagriddropdownfilter.DatagridDropdownFi
 | `selectionMethod` | enumeration | Yes | checkbox | `checkbox` \| `rowClick` | General::General | Selection method |
 | `valueAttribute` | attribute |  |  |  | General::Configurations | Attribute used to store the last value of the filter. Associations are not supported. |
 | `onChange` | action |  |  |  | General::Events | Action to be triggered when the value or filter changes. |
-| `ariaLabel` | textTemplate |  |  |  | Advanced::Accessibility | Assistive technology will read this upon reaching the input element. |
-| `emptySelectionCaption` | textTemplate |  |  |  | Advanced::Texts | This text is shown if no options are selected. For example 'Select color' or 'No options are selected'. |
-| `filterInputPlaceholderCaption` | textTemplate |  |  |  | Advanced::Texts | This text is shown as placeholder for filterable filters. For example 'Type to search'. |
+| `ariaLabel` | textTemplate |  |  |  | Accessibility::Accessibility | Assistive technology will read this upon reaching the input element. |
 
 ---
 

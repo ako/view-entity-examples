@@ -7,6 +7,8 @@ carry it, and the restriction is not about enumerations specifically:
 > 'QuarterSubmissionPerTypeVE': Only stored attributes which are of type
 > (String, Integer, Long or AutoNumber) are supported as a key.
 
+That is Mendix **10.24.24.119653**; Mendix 11.14.0 emits the same sentence.
+
 Four types are allowed — String, Integer, Long, AutoNumber — and the attribute
 has to be *stored* (a calculated attribute is out too). Everything else is
 rejected, so Decimal, DateTime, Boolean and Enumeration all fail the same way.

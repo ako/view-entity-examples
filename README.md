@@ -79,11 +79,22 @@ project by running those scripts in order with `mxcli exec`.
 
 ## Versions
 
-Built and verified on **Mendix 11.14.0** (`mxbuild`, `mxcli`, local runtime,
-PostgreSQL). The original question was about **10.24.24**; MxBuild for 10.24.x
-is not available from the Mendix CDN in the environment this was built in, so
-the error text and the captured responses here are 11.14.0's.
+The app is **Mendix 10.24.24.119653**, and every error message, `$metadata`
+document and response captured under `docs/` came out of it.
 
-Nothing in the scripts is 11-specific. To confirm the constraint on 10.24.24, apply
-[`mdl/99-enum-key-blocked.mdl`](mdl/99-enum-key-blocked.mdl) to a 10.24.24
-project and build.
+The same MDL scripts were also replayed onto a **Mendix 11.14.0** project
+first, and re-capturing `docs/metadata/` and `docs/responses/` from the
+10.24.24 app produced the same documents — git recorded no change to any of
+them. The build error is the same sentence too. The restriction is not
+something 10.24 is behind on.
+
+Mendix 10 publishes four-part versions on the CDN, so the version string is
+`10.24.24.119653`, not `10.24.24`:
+
+```bash
+mxcli setup mxbuild --version 10.24.24.119653
+mxcli new MyApp --version 10.24.24.119653
+```
+
+(`--theme none --layout none` on Mendix 10 — mxcli's generated layout uses
+design properties Atlas 10 does not carry.)

@@ -2,7 +2,7 @@
 
 - **Widget ID:** `com.mendix.widget.web.combobox.Combobox`
 - **Type:** PLUGGABLEWIDGET
-- **Version:** 2.5.0
+- **Version:** 2.4.3
 
 ## MDL Example
 
@@ -52,12 +52,10 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.combobox.Combobox' widget1
 | `customEditability` | enumeration | Yes | default | `default` \| `never` \| `conditionally` | General::Editability | Editable |
 | `customEditabilityExpression` | expression | Yes | false |  | General::Editability | Condition |
 | `readOnlyStyle` | enumeration | Yes | text | `bordered` \| `text` | General::Editability | How the combo box will appear in read-only mode. |
-| `onChangeEvent` | action |  |  |  | Events | On change |
-| `onChangeDatabaseEvent` | action |  |  |  | Events | On change |
-| `onEnterEvent` | action |  |  |  | Events | On enter |
-| `onLeaveEvent` | action |  |  |  | Events | On leave |
-| `onChangeFilterInputEvent` | action |  |  |  | Events | On filter input change |
-| `filterInputDebounceInterval` | integer | Yes | 200 |  | Events | The debounce interval for each filter input change event triggered in milliseconds. |
+| `onChangeEvent` | action |  |  |  | Events | On change action |
+| `onChangeDatabaseEvent` | action |  |  |  | Events | On change action |
+| `onEnterEvent` | action |  |  |  | Events | On enter action |
+| `onLeaveEvent` | action |  |  |  | Events | On leave action |
 | `ariaRequired` | expression | Yes | false |  | Accessibility::Accessibility | Aria required |
 | `ariaLabel` | textTemplate |  |  |  | Accessibility::Aria labels | Used to describe the combo box. |
 | `clearButtonAriaLabel` | textTemplate |  |  |  | Accessibility::Aria labels | Used to clear all selected values. |

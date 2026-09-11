@@ -2,7 +2,7 @@
 
 - **Widget ID:** `com.mendix.widget.web.datagrid.Datagrid`
 - **Type:** PLUGGABLEWIDGET
-- **Version:** 3.4.0
+- **Version:** 3.0.0
 
 ## MDL Example
 
@@ -29,9 +29,7 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.datagrid.Datagrid' widget1 {
 | `itemSelectionMethod` | enumeration | Yes | checkbox | `checkbox` \| `rowClick` | General::General | Selection method |
 | `itemSelectionMode` | enumeration | Yes | clear | `toggle` \| `clear` | General::General | Defines item selection behavior. |
 | `showSelectAllToggle` | boolean | Yes | true |  | General::General | Show a checkbox in the grid header to check or uncheck multiple items. |
-| `keepSelection` | boolean | Yes | false |  | General::General | If enabled, selected items will stay selected unless cleared by the user or a Nanoflow. |
 | `loadingType` | enumeration | Yes | spinner | `spinner` \| `skeleton` | General::General | Loading type |
-| `refreshIndicator` | boolean | Yes | false |  | General::General | Show a refresh indicator when the data is being loaded. |
 | `columns` | object | Yes |  | list; 21 sub-properties below | General::Columns | Columns |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ `showContentAs` | enumeration | Yes | attribute | `attribute` \| `dynamicText` \| `customContent` |  | Show |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ `attribute` | attribute |  |  |  |  | Attribute is required if the column can be sorted or filtered |
@@ -81,8 +79,6 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.datagrid.Datagrid' widget1 {
 | `cancelExportLabel` | textTemplate |  |  |  | Accessibility::Aria labels | Assistive technology will read this upon reaching a cancel button. |
 | `selectRowLabel` | textTemplate |  |  |  | Accessibility::Aria labels | If selection is enabled, assistive technology will read this upon reaching a checkbox. |
 | `selectAllRowsLabel` | textTemplate |  |  |  | Accessibility::Aria labels | If selection is enabled, assistive technology will read this upon reaching 'Select all' checkbox. |
-| `selectedCountTemplateSingular` | textTemplate |  |  |  | Accessibility::Aria labels | Must include '%d' to denote number position ('%d row selected') |
-| `selectedCountTemplatePlural` | textTemplate |  |  |  | Accessibility::Aria labels | Must include '%d' to denote number position ('%d rows selected') |
 
 ## Child Slots (curly-brace blocks)
 

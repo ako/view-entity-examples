@@ -2,7 +2,7 @@
 
 - **Widget ID:** `com.mendix.widget.web.image.Image`
 - **Type:** PLUGGABLEWIDGET
-- **Version:** 1.5.0
+- **Version:** 1.4.3
 
 ## MDL Example
 
@@ -30,12 +30,8 @@ PLUGGABLEWIDGET 'com.mendix.widget.web.image.Image' widget1 {
 | `alternativeText` | textTemplate |  |  |  | General::Accessibility | Alternative text of the image for accessibility purposes. |
 | `widthUnit` | enumeration | Yes | auto | `auto` \| `pixels` \| `percentage` | Dimensions::Dimensions | Width unit |
 | `width` | integer | Yes | 100 |  | Dimensions::Dimensions | Width |
-| `heightUnit` | enumeration | Yes | auto | `auto` \| `pixels` \| `percentage` \| `viewport` | Dimensions::Dimensions | Auto will keep the aspect ratio of the image. |
+| `heightUnit` | enumeration | Yes | auto | `auto` \| `pixels` | Dimensions::Dimensions | Auto will keep the aspect ratio of the image. |
 | `height` | integer | Yes | 100 |  | Dimensions::Dimensions | Height |
-| `minHeightUnit` | enumeration | Yes | none | `none` \| `pixels` \| `percentage` \| `viewport` | Dimensions::Dimensions | Minimum Height unit |
-| `minHeight` | integer | Yes | 0 |  | Dimensions::Dimensions | Minimum height |
-| `maxHeightUnit` | enumeration | Yes | none | `none` \| `pixels` \| `percentage` \| `viewport` | Dimensions::Dimensions | Maximum Height unit |
-| `maxHeight` | integer | Yes | 0 |  | Dimensions::Dimensions | Maximum height |
 | `iconSize` | integer | Yes | 14 |  | Dimensions::Dimensions | The size of the icon in pixels. |
 | `displayAs` | enumeration | Yes | fullImage | `fullImage` \| `thumbnail` | Dimensions::Dimensions | Show |
 | `responsive` | boolean | Yes | true |  | Dimensions::Dimensions | Image will never get larger than its original size. It can become smaller. |

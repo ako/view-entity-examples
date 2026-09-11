@@ -1,7 +1,8 @@
 $ ./mxcli exec ../mdl/99-enum-key-blocked.mdl -p ViewEntityExamples.mpr
+Connected to: ViewEntityExamples.mpr (Mendix 10.24.24.119653)
 Created OData service: Submissions.BlockedApi
 
-$ mxbuild --target=deploy ViewEntityExamples.mpr        # Mendix 11.14.0
+$ mxbuild --target=deploy ViewEntityExamples.mpr        # Mendix 10.24.24.119653
 Executing step 'Synchronize with file system'
 Executing step 'Initialize'
 Executing step 'Check prerequisites'
