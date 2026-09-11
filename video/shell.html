@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fan-out view entities and the OData key</title>
+<link rel="stylesheet" href="style.css">
+<body>
+<div id="stage"></div>
+<script src="scenes.js"></script>
+<script>
+  const stage = document.getElementById('stage');
+  let current = -1;
+
+  // Render one scene. Reveals start hidden; the recorder steps them in time
+  // with the narration so the viewer is never reading ahead of the voice.
+  window.showScene = function (i) {
+    if (i === current) return;
+    current = i;
+    stage.classList.remove('on');
+    stage.innerHTML = SCENES[i].html;
+    // force layout so the fade-in below is a real transition
+    void stage.offsetWidth;
+    stage.classList.add('on');
+  };
+
+  window.showStep = function (k) {
+    document.querySelectorAll('[data-step="' + k + '"]').forEach(el => el.classList.add('show'));
+  };
+
+  const n = Number(new URLSearchParams(location.search).get('scene') || 0);
+  showScene(n);
+</script>
+</body>

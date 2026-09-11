@@ -107,3 +107,14 @@ mxcli new MyApp --version 10.24.24.119653
 
 (`--theme none --layout none` on Mendix 10 — mxcli's generated layout uses
 design properties Atlas 10 does not carry.)
+
+## The explainer film
+
+[`video/`](video) builds a ~5 minute narrated walkthrough of all of this —
+`view-entity-odata-key.mp4`. Domain model, the OQL and what the fan-out term
+does to it, the build error, the non-unique key, both workarounds, and then the
+SQL and the query plan the OData call actually produces.
+
+Everything on screen comes from the captured artefacts in `docs/`, and the
+pipeline (narration first, picture timed to it) is documented in
+[`video/README.md`](video/README.md).

@@ -1,0 +1,29 @@
+--- (a) no $filter: everything aggregates
+                                          QUERY PLAN                                          
+----------------------------------------------------------------------------------------------
+ Limit (actual rows=12 loops=1)
+   ->  HashAggregate (actual rows=12 loops=1)
+         Group Key: p.profilenumber, sl.submissionyear, sl.quarterno, c.contracttype
+         Batches: 1  Memory Usage: 73kB
+         ->  Hash Join (actual rows=12 loops=1)
+               Hash Cond: (c."submissions$contract_profile" = p.id)
+               ->  Hash Join (actual rows=12 loops=1)
+                     Hash Cond: (sl."submissions$submissionline_contract" = c.id)
+                     ->  Seq Scan on "submissions$submissionline" sl (actual rows=12 loops=1)
+                     ->  Hash (actual rows=6 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           ->  Seq Scan on "submissions$contract" c (actual rows=6 loops=1)
+               ->  Hash (actual rows=3 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     ->  Seq Scan on "submissions$profile" p (actual rows=3 loops=1)
+ Planning Time: 0.697 ms
+ Execution Time: 0.223 ms
+(17 rows)
+
+
+--- (b) the non-unique key lookup returns how many rows?
+ rows_the_database_returned 
+----------------------------
+                          3
+(1 row)
+

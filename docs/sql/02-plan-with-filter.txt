@@ -1,0 +1,27 @@
+                                                                            QUERY PLAN                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=55.34..55.48 rows=5 width=120) (actual time=0.099..0.104 rows=4 loops=1)
+   ->  GroupAggregate  (cost=55.34..55.48 rows=5 width=120) (actual time=0.097..0.101 rows=4 loops=1)
+         Group Key: p.profilenumber, sl.submissionyear, sl.quarterno
+         ->  Sort  (cost=55.34..55.35 rows=5 width=80) (actual time=0.088..0.089 rows=4 loops=1)
+               Sort Key: p.profilenumber, sl.submissionyear, sl.quarterno
+               Sort Method: quicksort  Memory: 25kB
+               ->  Hash Join  (cost=40.98..55.28 rows=5 width=80) (actual time=0.063..0.065 rows=4 loops=1)
+                     Hash Cond: (p.id = c."submissions$contract_profile")
+                     ->  Seq Scan on "submissions$profile" p  (cost=0.00..13.10 rows=308 width=12) (actual time=0.008..0.008 rows=3 loops=1)
+                           Filter: (profilenumber IS NOT NULL)
+                     ->  Hash  (cost=40.91..40.91 rows=5 width=84) (actual time=0.043..0.044 rows=4 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           ->  Hash Join  (cost=17.41..40.91 rows=5 width=84) (actual time=0.039..0.042 rows=4 loops=1)
+                                 Hash Cond: (sl."submissions$submissionline_contract" = c.id)
+                                 ->  Seq Scan on "submissions$submissionline" sl  (cost=0.00..20.70 rows=1059 width=48) (actual time=0.003..0.004 rows=12 loops=1)
+                                       Filter: ((submissionyear IS NOT NULL) AND (quarterno IS NOT NULL))
+                                 ->  Hash  (cost=17.38..17.38 rows=3 width=52) (actual time=0.019..0.019 rows=2 loops=1)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                       ->  Seq Scan on "submissions$contract" c  (cost=0.00..17.38 rows=3 width=52) (actual time=0.008..0.009 rows=2 loops=1)
+                                             Filter: (((contracttype)::character varying IS NOT NULL) AND ((contracttype)::text = 'Freelance'::text))
+                                             Rows Removed by Filter: 4
+ Planning Time: 0.982 ms
+ Execution Time: 0.198 ms
+(23 rows)
+
