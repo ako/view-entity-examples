@@ -28,3 +28,31 @@ create or modify view entity Trends.MeterMonthVE (
   group by m.MeterCode, m.Region,
            datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
 );
+
+-- Published so the same view entity can be asked for a filtered slice from
+-- outside the app, which is where a WHERE clause is easiest to show whole.
+create or modify odata service Trends.BasicsApi (
+  path: 'odata/basics/v1/',
+  version: '1.0.0',
+  ODataVersion: OData4,
+  namespace: 'Basics',
+  ServiceName: 'BasicsApi',
+  Summary: 'Energy per meter per month'
+)
+authentication basic
+{
+  publish entity Trends.MeterMonthVE as 'MeterMonth' (
+    ReadMode: source,
+    InsertMode: not_supported,
+    UpdateMode: not_supported,
+    DeleteMode: not_supported
+  )
+  expose (
+    MeterCode    as 'meterCode'    (key, Filterable, Sortable),
+    PeriodYear   as 'periodYear'   (key, Filterable, Sortable),
+    MonthNo      as 'monthNo'      (key, Filterable, Sortable),
+    Region       as 'region'       (Filterable, Sortable),
+    TotalKwh     as 'totalKwh'     (Filterable, Sortable),
+    ReadingCount as 'readingCount' (Filterable, Sortable)
+  );
+};

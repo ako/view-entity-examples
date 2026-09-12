@@ -16,13 +16,12 @@ create or replace page Trends.MeterMonths
   DYNAMICTEXT dtSub (Content: 'One row per meter per month, computed from 6570 readings when you ask for it.')
   DATAGRID gridMeterMonth (DataSource: DATABASE Trends.MeterMonthVE, PageSize: 15)
   {
-    -- The filter widget goes in the grid's filters placeholder (`controlbar`),
-    -- which is where a Data Grid 2 filter links itself to the grid's own
-    -- datasource. A per-column FILTER block parses but is dropped on write by
-    -- this mxcli build, so this is the form that survives.
-    controlbar cbFilters {
-      textfilter tfMeter (attrChoice: 'auto', defaultFilter: 'equal')
-    }
+    -- No filter widget: a Data Grid 2 filter needs its `linkedDs` set to the
+    -- grid's own datasource, and this mxcli build recognises that property but
+    -- does not persist it (MDL-WIDGET06); a per-column FILTER block parses and
+    -- is dropped on write. A filter written without the link renders as
+    -- "Unable to get filter store. Check parent widget configuration."
+    -- Sorting and paging are enough to show what the grid pushes down.
     COLUMN colMeter (Attribute: MeterCode, Caption: 'Meter', Sortable: true)
     COLUMN colRegion (Attribute: Region, Caption: 'Region', Sortable: true)
     COLUMN colYear (Attribute: PeriodYear, Caption: 'Year', Alignment: right, Sortable: true)

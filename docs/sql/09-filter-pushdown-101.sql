@@ -1,0 +1,7 @@
+-- GET odata/basics/v1/MeterMonth?$filter=meterCode eq 'M-004' and periodYear eq 2025
+--                              &$orderby=monthNo
+-- One request, one statement. The filter is a parameter in the WHERE clause,
+-- so the 6570 readings are aggregated and discarded inside PostgreSQL.
+
+SELECT  "Trends.MeterMonthVE"."MeterCode", "Trends.MeterMonthVE"."Region", "Trends.MeterMonthVE"."PeriodYear", "Trends.MeterMonthVE"."MonthNo", "Trends.MeterMonthVE"."TotalKwh", "Trends.MeterMonthVE"."ReadingCount" FROM ( SELECT  "m"."metercode" AS "MeterCode", "m"."region" AS "Region", (EXTRACT(YEAR FROM "r"."readat" AT TIME ZONE 'UTC' AT TIME ZONE 'UTC'))::integer AS "PeriodYear", (EXTRACT(MONTH FROM "r"."readat" AT TIME ZONE 'UTC' AT TIME ZONE 'UTC'))::integer AS "MonthNo", SUM("r"."kwh") AS "TotalKwh", COUNT("r"."id") AS "ReadingCount" FROM "trends$reading" "r" INNER JOIN "trends$meter" "m" ON "m"."id" = "r"."trends$reading_meter" GROUP BY "m"."metercode", "m"."region", (EXTRACT(YEAR FROM "r"."readat" AT TIME ZONE 'UTC' AT TIME ZONE 'UTC'))::integer, (EXTRACT(MONTH FROM "r"."readat" AT TIME ZONE 'UTC' AT TIME ZONE 'UTC'))::integer ) "Trends.MeterMonthVE" WHERE (NOT "Trends.MeterMonthVE"."MeterCode" IS NULL) AND (NOT "Trends.MeterMonthVE"."PeriodYear" IS NULL) AND (NOT "Trends.MeterMonthVE"."MonthNo" IS NULL) AND "Trends.MeterMonthVE"."MeterCode" = ? AND "Trends.MeterMonthVE"."PeriodYear" = ? ORDER BY "Trends.MeterMonthVE"."MonthNo" ASC LIMIT ?
+-- ConnectionBus_Retrieve: SQL@319d48ad(T77-C3358ba9a): Select params 1-3: M-004, 2025, 3000

@@ -61,3 +61,25 @@ The caption bar that used to carry the compositor's only moving element is gone.
 Measured after removing it: a 6s still tail records at 0.986x wall clock on a
 frozen page and 1.133x with the chrome hairline drawing across the frame. It
 does not collapse either way, and the linear map handles both.
+
+
+## Film 3, built on the system rather than conformed to it
+
+`view-entities-101` is the first deck written against the type rather than
+retro-fitted, and it lands inside Type C without a deviation to report:
+
+| | film 1 | film 2 | film 3 |
+|---|---|---|---|
+| frames | 13 | 11 | 22 |
+| length | 340s | 235s | 328s |
+| voice density | ~85% | ~82% | 72% |
+
+The type's band is 240-330s at 70-75% density over 22-30 frames, and the reason
+films 1 and 2 miss it is visible in the first row: 13 frames carrying 288s of
+narration is 22s a frame, where the type assumes about 10. Nothing was padded
+to reach the number here; the narration was written to the frame budget and
+then cut by about 40s after the first audio build measured 359s.
+
+One thing the type's own numbers do not cover: a beginner film needs more
+frames for the same material, because each frame carries less. 22 frames for
+five minutes is the floor, not the ceiling.

@@ -8,6 +8,7 @@ over OData. Every error message, payload, SQL statement and query plan in
 |---|---|
 | **1. The fan-out and the OData key** | A view entity that fans out has a compound key whose last part is an enumeration — which a published OData resource will not accept. What breaks if you route around it, and three workarounds. [docs 1–4](docs) |
 | **2. Three groupings without parameters** | A chart that switches between week, month and quarter, built as one unioned view entity with a `Grain` column instead of a parameterised view. The database only executes the branch you filter for. [docs 5](docs/05-union-instead-of-parameters.md) |
+| **3. What a view entity is** | The same machinery from zero: one view entity, a data grid on top of it, and what the database is asked as you sort, page and filter. For someone who has never written a query. [docs 6](docs/06-view-entities-101.md) |
 
 ---
 
@@ -124,10 +125,14 @@ requests in [`requests/trends.http`](requests/trends.http).
 
 [`video/`](video) builds a narrated walkthrough of each example:
 
-- **`view-entity-odata-key.mp4`** (4m21s) — domain model, the OQL and what the
+- **`view-entities-101.mp4`** (5m28s) — what a view entity is, for someone who
+  has never written a query: table/row/column, the three OQL clauses, the view
+  under a data grid, and what the database is asked as you sort, page and
+  filter. Ends on the plans and the three errors you meet first.
+- **`view-entity-odata-key.mp4`** (5m40s) — domain model, the OQL and what the
   fan-out term does to it, the build error, the non-unique key, both
   workarounds, then the SQL and the query plan the OData call produces.
-- **`view-entity-union-grains.mp4`** (2m56s) — the chart's three states, the unioned
+- **`view-entity-union-grains.mp4`** (3m55s) — the chart's three states, the unioned
   view, the bound-parameter subtlety, and the two query plans side by side.
 
 Everything on screen comes from the captured artefacts in `docs/`. The pipeline

@@ -1,0 +1,101 @@
+{
+ "@odata.context": "http://127.0.0.1:8080/odata/basics/v1/$metadata#MeterMonth",
+ "value": [
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 1,
+   "region": "Region 4",
+   "totalKwh": 654.0,
+   "readingCount": 31
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 2,
+   "region": "Region 4",
+   "totalKwh": 591.0,
+   "readingCount": 28
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 3,
+   "region": "Region 4",
+   "totalKwh": 646.0,
+   "readingCount": 31
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 4,
+   "region": "Region 4",
+   "totalKwh": 630.0,
+   "readingCount": 30
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 5,
+   "region": "Region 4",
+   "totalKwh": 656.0,
+   "readingCount": 31
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 6,
+   "region": "Region 4",
+   "totalKwh": 634.0,
+   "readingCount": 30
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 7,
+   "region": "Region 4",
+   "totalKwh": 644.0,
+   "readingCount": 31
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 8,
+   "region": "Region 4",
+   "totalKwh": 648.0,
+   "readingCount": 31
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 9,
+   "region": "Region 4",
+   "totalKwh": 633.0,
+   "readingCount": 30
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 10,
+   "region": "Region 4",
+   "totalKwh": 658.0,
+   "readingCount": 31
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 11,
+   "region": "Region 4",
+   "totalKwh": 626.0,
+   "readingCount": 30
+  },
+  {
+   "meterCode": "M-004",
+   "periodYear": 2025,
+   "monthNo": 12,
+   "region": "Region 4",
+   "totalKwh": 624.0,
+   "readingCount": 30
+  }
+ ]
+}

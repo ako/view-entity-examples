@@ -1,0 +1,25 @@
+Three errors a first view entity runs into, captured with mxcli check against
+ViewEntityExamples.mpr (Mendix 10.24.24.119653).
+
+1. A reserved word as a column name
+   select datepart(YEAR, r.ReadAt) as Year, ...
+
+   OQL reserved word "Year" used unquoted - MxBuild rejects the view with
+   CE0174; quote it as "Year"                                        [MDL032]
+   -> In a source position, quote it: s."Year". For an ALIAS this is not
+      available, so rename that one, e.g. "Year"Value.
+
+2. ORDER BY with no LIMIT
+   group by m.MeterCode
+   order by sum(r.Kwh) desc
+
+   ORDER by without limit: view entity OQL queries that use ORDER by must also
+   specify a limit clause                                            [MDL030]
+   -> Add a limit clause after ORDER by
+
+3. The select list and the attribute list disagree
+   create or modify view entity Trends.T3 (MeterCode: String(20), TotalKwh: Decimal)
+   as ( select m.MeterCode, sum(r.Kwh), count(r.ID) ... )
+
+   view entity 'Trends.T3' has type mismatches:
+   - OQL select has 3 columns but 2 attributes declared

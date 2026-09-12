@@ -1,0 +1,62 @@
+Selecting a persistent entity's id under an alias is how a view entity gets an
+association to that entity. Studio Pro creates the association member when you
+add the column; mxcli (nightly-20260909) writes the OQL but not the member, and
+the build then refuses the model.
+
+$ cat assoc.mdl
+create or modify view entity Trends.MeterMonthRefVE (
+  PeriodYear: Integer,
+  MonthNo: Integer,
+  TotalKwh: Decimal
+) as (
+  select m.ID                         as meter
+  ,      datepart(YEAR, r.ReadAt)     as PeriodYear
+  ,      datepart(MONTH, r.ReadAt)    as MonthNo
+  ,      sum(r.Kwh)                   as TotalKwh
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.ID, datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
+);
+
+$ ./mxcli check assoc.mdl -p ViewEntityExamples.mpr
+  view entity 'Trends.MeterMonthRefVE' has type mismatches:
+  - attribute 'TotalKwh': declared as Decimal but OQL expression returns Integer
+        (the checker aligns the four select columns against the three declared
+         attributes without skipping the id column)
+
+  -- and with the id column selected last:
+  - OQL select has 4 columns but 3 attributes declared
+
+$ ./mxcli exec assoc.mdl -p ViewEntityExamples.mpr --no-check
+Created view entity: Trends.MeterMonthRefVE
+
+$ ./mxcli -p ViewEntityExamples.mpr -c "SHOW ASSOCIATIONS" | grep Trends
+| Trends.Reading_Meter | Trends | Reading_Meter | Trends.Reading | Trends.Meter | Reference | Default | Column |
+        -- no association was created for the `meter` column
+
+$ mxbuild --target=deploy ViewEntityExamples.mpr      # Mendix 10.24.24.119653
+ERROR: The project cannot be deployed, because it contains errors.
+ERROR at Trends, Domain model, Entity 'Trends.MeterMonthRefVE': OQL View Entity
+is out of sync with the OQL Query.
+BUILD FAILED
+
+The same construct written in Studio Pro 11.14 does create the member. From
+ako/TestApp:
+
+$ mxcli -p TestApp.mpr -c "DESCRIBE ENTITY ViewAssociations.OrdersVE"
+create or modify view entity ViewAssociations.OrdersVE (
+  order_date: DateTime
+) as (
+  from Mappings."Order" as o
+  select
+    o.ID as persistent_order
+  , o.OrderDate as order_date
+);
+
+$ mxcli -p TestApp.mpr -c "SHOW ASSOCIATIONS" | grep persistent_order
+| ViewAssociations.persistent_order | ViewAssociations | persistent_order |
+  ViewAssociations.OrdersVE | Mappings.Order | Reference | Default | Column |
+
+So: the alias becomes the association name, the association points at the
+persistent entity whose id was selected, and the id column is not one of the
+view entity's attributes.
