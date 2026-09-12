@@ -1,0 +1,42 @@
+-- A page whose data grid reads the view entity directly.
+--
+-- No microflow, no list variable: the grid's datasource is the view entity, so
+-- the grid's own filter, sort and paging are turned into the query that answers
+-- it. That is the point film 3 makes - the filter runs in the database, not in
+-- the browser and not in the runtime.
+
+create or replace page Trends.MeterMonths
+(
+  Title: 'Energy per meter per month',
+  Layout: Atlas_Core.Atlas_Default,
+  Url: 'meter-months'
+)
+{
+  TITLE ttlPage (Content: 'Energy per meter per month')
+  DYNAMICTEXT dtSub (Content: 'One row per meter per month, computed from 6570 readings when you ask for it.')
+  DATAGRID gridMeterMonth (DataSource: DATABASE Trends.MeterMonthVE, PageSize: 15)
+  {
+    -- The filter widget goes in the grid's filters placeholder (`controlbar`),
+    -- which is where a Data Grid 2 filter links itself to the grid's own
+    -- datasource. A per-column FILTER block parses but is dropped on write by
+    -- this mxcli build, so this is the form that survives.
+    controlbar cbFilters {
+      textfilter tfMeter (attrChoice: 'auto', defaultFilter: 'equal')
+    }
+    COLUMN colMeter (Attribute: MeterCode, Caption: 'Meter', Sortable: true)
+    COLUMN colRegion (Attribute: Region, Caption: 'Region', Sortable: true)
+    COLUMN colYear (Attribute: PeriodYear, Caption: 'Year', Alignment: right, Sortable: true)
+    COLUMN colMonth (Attribute: MonthNo, Caption: 'Month', Alignment: right, Sortable: true)
+    COLUMN colKwh (Attribute: TotalKwh, Caption: 'Total kWh', Alignment: right, Sortable: true)
+    COLUMN colCount (Attribute: ReadingCount, Caption: 'Readings', Alignment: right, Sortable: true)
+  }
+}
+;
+
+create or replace navigation Responsive
+  home page Trends.MeterMonths
+  menu (
+    menu item 'Energy per month' page Trends.MeterMonths icon glyph 57377;
+    menu item 'Home' page MyFirstModule.Home_Web icon glyph 57377;
+  )
+;

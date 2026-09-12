@@ -1,0 +1,30 @@
+-- Film 3's view entity: the smallest useful one.
+--
+-- The question is "how much energy did each meter use, per month?". Nobody
+-- stored that; it is computed from Trends.Reading (6570 rows) joined to
+-- Trends.Meter (6 rows) whenever something asks.
+--
+-- Three clauses and nothing else: what to return, where to get it, what to
+-- group by. Every column in the select list is either a grouping key or an
+-- aggregate - that is the one rule GROUP BY enforces.
+
+@position(100, 700)
+create or modify view entity Trends.MeterMonthVE (
+  MeterCode: String(20),
+  Region: String(40),
+  PeriodYear: Integer,
+  MonthNo: Integer,
+  TotalKwh: Decimal,
+  ReadingCount: Integer
+) as (
+  select m.MeterCode                  as MeterCode
+  ,      m.Region                     as Region
+  ,      datepart(YEAR, r.ReadAt)     as PeriodYear
+  ,      datepart(MONTH, r.ReadAt)    as MonthNo
+  ,      sum(r.Kwh)                   as TotalKwh
+  ,      count(r.ID)                  as ReadingCount
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.MeterCode, m.Region,
+           datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
+);
