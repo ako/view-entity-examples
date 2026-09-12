@@ -1,0 +1,49 @@
+-- Query plans for Trends.MeterYearVE (a view entity over a view entity).
+-- PostgreSQL 16, EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF).
+
+--- (a) the composed view, whole: 18 rows out of 6570 readings
+                                                      QUERY PLAN                                                       
+-----------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=18 loops=1)
+   ->  HashAggregate (actual rows=18 loops=1)
+         Group Key: m.metercode, ((EXTRACT(year FROM r.readat))::integer)
+         Batches: 1  Memory Usage: 49kB
+         ->  HashAggregate (actual rows=216 loops=1)
+               Group Key: m.metercode, (EXTRACT(year FROM r.readat))::integer, (EXTRACT(month FROM r.readat))::integer
+               Batches: 1  Memory Usage: 337kB
+               ->  Hash Join (actual rows=6570 loops=1)
+                     Hash Cond: (r."trends$reading_meter" = m.id)
+                     ->  Seq Scan on "trends$reading" r (actual rows=6570 loops=1)
+                     ->  Hash (actual rows=6 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           ->  Seq Scan on "trends$meter" m (actual rows=6 loops=1)
+ Planning Time: 1.263 ms
+ Execution Time: 5.667 ms
+(15 rows)
+
+
+--- (b) the same, filtered on the OUTER view: does it reach the base table?
+                                                       QUERY PLAN                                                        
+-------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=3 loops=1)
+   ->  GroupAggregate (actual rows=3 loops=1)
+         Group Key: ((EXTRACT(year FROM r.readat))::integer)
+         ->  GroupAggregate (actual rows=36 loops=1)
+               Group Key: ((EXTRACT(year FROM r.readat))::integer), ((EXTRACT(month FROM r.readat))::integer)
+               ->  Sort (actual rows=1095 loops=1)
+                     Sort Key: ((EXTRACT(year FROM r.readat))::integer), ((EXTRACT(month FROM r.readat))::integer)
+                     Sort Method: quicksort  Memory: 100kB
+                     ->  Hash Join (actual rows=1095 loops=1)
+                           Hash Cond: (r."trends$reading_meter" = m.id)
+                           ->  Seq Scan on "trends$reading" r (actual rows=6570 loops=1)
+                           ->  Hash (actual rows=1 loops=1)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                 ->  Bitmap Heap Scan on "trends$meter" m (actual rows=1 loops=1)
+                                       Recheck Cond: ((metercode)::text = 'M-004'::text)
+                                       Heap Blocks: exact=1
+                                       ->  Bitmap Index Scan on "idx_trends$meter_metercode_asc" (actual rows=1 loops=1)
+                                             Index Cond: ((metercode)::text = 'M-004'::text)
+ Planning Time: 0.165 ms
+ Execution Time: 1.722 ms
+(20 rows)
+

@@ -1,0 +1,25 @@
+-- A view entity that reads another view entity.
+--
+-- MeterYearVE never touches Trends.Reading. It reads MeterMonthVE, which is
+-- itself a query - so the two compose into one statement with two nested
+-- derived tables, and the month view does not know it is being read.
+--
+-- The reason to do this is not fewer keystrokes: it is that "per month" is
+-- defined once. Change the month view and the year view follows.
+
+@position(600, 900)
+create or modify view entity Trends.MeterYearVE (
+  MeterCode: String(20),
+  PeriodYear: Integer,
+  TotalKwh: Decimal,
+  MonthsCovered: Integer,
+  BusiestMonthKwh: Decimal
+) as (
+  select v.MeterCode          as MeterCode
+  ,      v.PeriodYear         as PeriodYear
+  ,      sum(v.TotalKwh)      as TotalKwh
+  ,      count(v.MonthNo)     as MonthsCovered
+  ,      max(v.TotalKwh)      as BusiestMonthKwh
+  from   Trends.MeterMonthVE as v
+  group by v.MeterCode, v.PeriodYear
+);
