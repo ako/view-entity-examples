@@ -113,3 +113,16 @@ published-resource call, because the filter it shows turned out to be writable
 in MDL after all — the syntax was in a skill reference, not in `mxcli syntax`.
 So the film follows one page from datasource to `ILIKE` without changing
 subject, and the screenshot is there for what it is: the editor, mid-edit.
+
+
+## Film 4, and the frame count
+
+`shaping-composing` is 19 frames for 320.6s at 72% density — in Type C's length
+and density bands on the first audio build, and **under** its 22-30 frame
+band. The material is the reason: three of its frames carry a captured SQL
+statement that has to be read as one thing (the association's two statements,
+the nested subqueries, the stacked plan), and splitting those to reach 22 would
+put half a statement on each of two frames.
+
+Splitting them anyway would also have pushed the film to ~335s, past the
+ceiling. Given a choice between two numbers, length is the one a viewer feels.
