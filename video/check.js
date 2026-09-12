@@ -27,9 +27,6 @@ const CMAP = new Set(JSON.parse(fs.readFileSync('fonts/cmap.json', 'utf8')));
   for (const sc of DECK.scenes) {
     const h = sc.html;
 
-    const accents = (h.match(/class="[^"]*\b(accent|mark)\b/g) || []).length;
-    if (accents !== 1) note(sc.id, `${accents} accent elements, must be exactly 1`);
-
     if (/border-radius|box-shadow/.test(h)) note(sc.id, 'border-radius or box-shadow in scene markup');
     const light = h.match(/background:\s*#(?:[89a-f][0-9a-f]{5}|fff|f[0-9a-f]{5})/gi);
     if (light) note(sc.id, `light background ${light.join(', ')}`);
@@ -63,7 +60,7 @@ const CMAP = new Set(JSON.parse(fs.readFileSync('fonts/cmap.json', 'utf8')));
     const sc = DECK.scenes[i];
     await page.goto(`${url}?deck=${DECK.name}&scene=${i}`);
     await page.evaluate(() => { for (let k = 1; k <= 6; k++) window.showStep(k); });
-    await page.waitForTimeout(220);
+    await page.waitForTimeout(700);   // let the reveal transitions settle
 
     const r = await page.evaluate(({ bottom, left, right, top }) => {
       const out = { fonts: new Set(), mono: [], over: [], ligatures: null, ground: null };
@@ -88,6 +85,27 @@ const CMAP = new Set(JSON.parse(fs.readFileSync('fonts/cmap.json', 'utf8')));
         const cs = getComputedStyle(document.getElementById(id));
         out.fonts.add(cs.fontFamily);
       }
+      // "Exactly one accent event per frame" is a design rule enforceable as a
+      // measurement, so measure it in the rendered page rather than trusting a
+      // class name: count the elements that INTRODUCE the accent colour (a
+      // child that merely inherits it is the same event).
+      const ACCENT = 'rgb(63, 189, 184)';
+      const introduces = (el) => {
+        const cs = getComputedStyle(el);
+        const p = el.parentElement ? getComputedStyle(el.parentElement) : null;
+        if (cs.backgroundColor === ACCENT) return true;
+        if (cs.borderLeftColor === ACCENT && parseFloat(cs.borderLeftWidth) > 0) return true;
+        return cs.color === ACCENT && (!p || p.color !== ACCENT);
+      };
+      out.accent = [];
+      for (const el of document.querySelectorAll('#stage, #stage *')) {
+        if (introduces(el)) {
+          // a run of sibling bars painted by one rule is one event
+          const key = el.tagName === 'I' ? 'bars:' + el.parentElement.className : null;
+          if (key && out.accent.includes(key)) continue;
+          out.accent.push(key || el.tagName + '.' + String(el.className).slice(0, 20));
+        }
+      }
       const cl = document.getElementById('chrome-l').getBoundingClientRect();
       const rl = document.getElementById('chrome-rule').getBoundingClientRect();
       out.chrome = { top: Math.round(cl.top), ruleTop: Math.round(rl.top),
@@ -102,6 +120,10 @@ const CMAP = new Set(JSON.parse(fs.readFileSync('fonts/cmap.json', 'utf8')));
     if (r.ligatures !== 'none') note(sc.id, `font-variant-ligatures is "${r.ligatures}", must be none`);
     if (r.ground !== 'rgb(14, 17, 22)') note(sc.id, `ground is ${r.ground}, must be #0e1116`);
     if (r.over.length) note(sc.id, `outside the safe area: ${r.over.slice(0, 3).join(' ; ')}`);
+    if (r.accent.length !== 1) {
+      note(sc.id, `${r.accent.length} accent events, must be exactly 1` +
+        (r.accent.length ? `: ${r.accent.join(', ')}` : ''));
+    }
     if (!sc.noChrome) {
       if (r.chrome.hidden) note(sc.id, 'chrome suppressed on a non-declarative frame');
       if (r.chrome.top !== 52) note(sc.id, `chrome label top ${r.chrome.top}, must be 52 (baseline y76)`);

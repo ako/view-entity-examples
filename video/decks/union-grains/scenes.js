@@ -55,10 +55,9 @@ return [
       <div class="col card">${chart('Month', 'Jan', 'Dec', true)}</div>
       <div class="col card">${chart('Quarter', 'Q1', 'Q4', false)}</div>
     </div>
-    <p class="note step" data-step="1">The obvious design: make the grouping a parameter
-       and have the view entity return one of these three shapes per call.</p>
-    <p class="note step" data-step="2">But nothing about the data changed &mdash;
-       only how it was grouped.</p>`
+    <p class="note"><span class="step" data-step="1">The obvious design: make the grouping a parameter
+       and have the view entity return one of these three shapes per call. </span>
+       <span class="step" data-step="2">But nothing about the data changed &mdash; only how it was grouped.</span></p>`
 },
 {
   id: "model", label: "Domain model", kind: "command",
@@ -72,20 +71,20 @@ return [
         <marker id="ar2" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
           <path d="M1,1 L11,6 L1,11" fill="none" stroke="#98a3b3" stroke-width="2"/></marker>
        </defs>
-        <line x1="1020" y1="110" x2="900" y2="110" stroke="#262828" stroke-width="1"/>
+        <line x1="1014" y1="110" x2="714" y2="110" stroke="#262828" stroke-width="1"/>
       </svg>
-      <div class="ent" style="left:420px;top:20px">
+      <div class="ent" style="left:234px;top:20px">
         <div class="hd"><span>Meter</span></div>
         <div class="at"><span>MeterCode</span><span class="t">String(20)</span></div>
         <div class="at"><span>Region</span><span class="t">String(40)</span></div>
       </div>
-      <div class="ent" style="left:1020px;top:20px">
+      <div class="ent" style="left:1014px;top:20px">
         <div class="hd"><span>Reading</span></div>
         <div class="at"><span>ReadAt</span><span class="t">DateTime</span></div>
         <div class="at"><span>Kwh</span><span class="t">Decimal</span></div>
       </div>
-      <div class="lbl" style="left:706px;top:250px;width:420px;text-align:center">Reading_Meter</div>
-      <div class="callout step" data-step="1" style="left:420px;top:300px;max-width:1000px">
+      <div class="lbl" style="left:654px;top:250px;width:420px;text-align:center">Reading_Meter</div>
+      <div class="callout step" data-step="1" style="left:234px;top:330px;max-width:1260px">
         <span class="accent">6 meters x 1095 daily readings = 6570 rows.</span><br>
         Every grouping in this film is computed from these, per request.
       </div>
@@ -204,7 +203,7 @@ GET .../UsageTrend?$filter=(grain eq 'Quarter' or grain eq 'Month')
             -&gt; Result (actual rows=0)
                  <span class="mark" data-step="1">One-Time Filter: false</span>
        -&gt; <span class="kw">GroupAggregate</span> (actual rows=36)           <span class="cm">&lt;- Month</span>
-            -&gt; <span class="step" data-step="2">Nested Loop (actual rows=1095)
+            <span class="step" data-step="2">-&gt; Nested Loop (actual rows=1095)
                  -&gt; Bitmap Index Scan on idx_trends$meter_metercode
                  -&gt; Bitmap Heap Scan on trends$reading (rows=1095)</span>
        -&gt; <span class="kw">GroupAggregate</span> (actual rows=0)            <span class="cm">&lt;- Quarter</span>

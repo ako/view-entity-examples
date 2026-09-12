@@ -77,7 +77,7 @@ b,strong{font-weight:700}
 
 /* ---- §4 the plane: flat. no radius, no shadow, no light ground -------- */
 .card{background:var(--panel);border:1px solid var(--line);padding:24px 26px}
-.cols{display:flex;gap:28px;align-items:flex-start;min-height:0}
+.cols{display:flex;gap:28px;align-items:flex-start;flex-shrink:0}
 .col{flex:1;min-width:0}
 pre{margin:0;font-size:30px;line-height:1.45;white-space:pre;overflow:hidden}
 
@@ -122,17 +122,17 @@ tr.hl td{background:var(--panel)}
          padding:18px 22px;font-size:28px;color:var(--dim);max-width:640px}
 
 /* ---- charts: one series, no legend - the panel title names it --------- */
-.chart .bars{display:flex;align-items:flex-end;gap:2px;height:200px;margin:8px 0 0}
+.chart .bars{display:flex;align-items:flex-end;gap:2px;height:150px;margin:8px 0 0}
 .chart .bars i{display:block;flex:1 1 0;min-width:3px;background:var(--dim)}
 .chart.accent-series .bars i{background:var(--accent)}
 .chart .xa{display:flex;justify-content:space-between;border-top:1px solid var(--line);
            padding-top:12px;font-size:24px;color:var(--faint);
            font-family:"Recursive",monospace;font-variation-settings:"MONO" 1}
 .chart .peak{font-size:26px;color:var(--dim);margin-top:12px}
-.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);margin-bottom:22px}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);margin-bottom:8px}
 .seg span{padding:10px 26px;font-size:28px;color:var(--dim);border-right:1px solid var(--line)}
 .seg span:last-child{border-right:0}
-.seg span.on{color:var(--accent)}
+.seg span.on{color:var(--ink);font-weight:700}
 
 /* ---- §6 the closing lockup -------------------------------------------- */
 #lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;

@@ -321,7 +321,7 @@ AutoNumber) are supported as a key.</pre>
 {
   id: "close", label: "Three options", kind: "result",
   narration: "So: a String shadow of the enumeration, which is one line of OQL and one expression in the SQL. A reference entity, if the enumeration was straining anyway. Or one composite id, when the consumer wants a single opaque key. All three are workarounds for a restriction the wire format does not need - the value is already a string in the payload, Mendix already accepts it as a string in a filter, and OData version four permits an enumeration as a key property.",
-  steps: 3, cues: [{"step": 1, "s": 3}, {"step": 2, "s": 3, "d": 4}, {"step": 3, "s": 3, "d": 8.2}],
+  steps: 2, cues: [{"step": 1, "s": 3}, {"step": 2, "s": 3, "d": 4}],
   html: `
     <h2>Three ways to key the fan-out</h2>
     <div class="cols" style="margin-bottom:30px">
@@ -347,11 +347,11 @@ AutoNumber) are supported as a key.</pre>
     <div class="card step" data-step="1">
       <h3>Why this is worth asking Mendix to lift</h3>
       <p class="note" style="margin-top:0">
-        <span class="step" data-step="2">The enumeration is already <code>Edm.String</code> in
+        The enumeration is already <code>Edm.String</code> in
         <code>$metadata</code> and already a string in every payload, and
         <code>$filter=contractType eq 'Freelance'</code> works today against the
-        enumeration itself. </span>
-        <span class="step" data-step="3">The key predicate would carry the identical literal &mdash;
+        enumeration itself.
+        <span class="step" data-step="2">The key predicate would carry the identical literal &mdash;
         and OData v4 permits an enumeration type as a key property.</span></p>
     </div>`
 },

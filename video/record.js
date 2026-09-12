@@ -137,7 +137,20 @@ const CLIPS = DECK.clipDir;
   }
 
   await browser.close();
-  fs.writeFileSync(DECK.clipsJson, JSON.stringify(report, null, 2));
+
+  // Recording a subset must not drop the other scenes' anchors: assemble.js
+  // needs one entry per clip and a single-scene re-record used to leave it with
+  // exactly one, which fails the whole deck.
+  let all = [];
+  if (fs.existsSync(DECK.clipsJson)) {
+    try { all = JSON.parse(fs.readFileSync(DECK.clipsJson, 'utf8')); } catch { all = []; }
+  }
+  for (const row of report) {
+    const at = all.findIndex(r => r.index === row.index);
+    if (at >= 0) all[at] = row; else all.push(row);
+  }
+  all.sort((a, b) => a.index - b.index);
+  fs.writeFileSync(DECK.clipsJson, JSON.stringify(all, null, 2));
   const bad = report.filter(r => r.video < r.audio);
   if (bad.length) {
     console.error(`\n${bad.length} clip(s) shorter than their narration: ` +
