@@ -60,3 +60,29 @@ $ mxcli -p TestApp.mpr -c "SHOW ASSOCIATIONS" | grep persistent_order
 So: the alias becomes the association name, the association points at the
 persistent entity whose id was selected, and the id column is not one of the
 view entity's attributes.
+
+Re-run on 11.14.0 (a scratch copy of ako/TestApp, its own Mappings module):
+identical. mxcli writes no association, and mxbuild names the missing one:
+
+  ERROR at ViewAssociations, OQL query 'ProductTotalsVE', Property 'OQL Query':
+  The selected association 'ViewAssociations.a_product' no longer exists.
+
+Creating it by hand gets a different refusal, on both versions:
+
+  $ create association ViewAssociations.a_product
+      from ViewAssociations.ProductTotalsVE to Mappings.Product
+      type Reference owner Default;
+  Created association: ViewAssociations.a_product
+
+  ERROR at ViewAssociations, Domain model, Cross-module association
+  'ViewAssociations.a_product': It is not possible to create associations
+  to/from View Entities.
+
+The two associations differ in exactly one field, and the rest of the story is
+in 07-view-entity-associations.md: Studio Pro's carries
+
+  Source: DomainModels$OqlViewAssociationSource { Reference: "<the alias>" }
+
+where mxcli's carries Source: null. Adding that subdocument
+(tools/add-oql-view-association.py) makes both versions build, and the
+association then works at runtime on 10.24.

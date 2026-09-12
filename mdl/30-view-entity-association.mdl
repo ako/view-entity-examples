@@ -1,0 +1,41 @@
+-- A view entity with an association to a persistent entity.
+--
+-- Selecting a persistent entity's id under an alias is how a view entity gets
+-- an association: the alias becomes the association name, and the column is
+-- NOT one of the view entity's attributes. Studio Pro creates the association
+-- member when you add the column.
+--
+-- This script gets you as far as mxcli can (nightly-20260909): it needs
+-- --no-check, because the checker aligns the select columns against the
+-- declared attributes without skipping the id column, and the association it
+-- creates is missing the one field that marks it as an OQL view association.
+-- See docs/07-view-entity-associations.md; tools/add-oql-view-association.py
+-- adds that field.
+--
+--   ./mxcli exec ../mdl/30-view-entity-association.mdl -p ViewEntityExamples.mpr --no-check
+--   python3 ../tools/add-oql-view-association.py \
+--       mprcontents/9b/40/9b4023c4-7311-46a1-b816-8db00d50f686.mxunit MeterRef
+--
+-- The alias may not collide with an entity name in the module, case-insensitively:
+-- `as meter` next to entity Trends.Meter is "Duplicate name 'Meter' in module
+-- 'Trends'. Entities, associations and enumerations cannot share names."
+
+@position(600, 700)
+create or modify view entity Trends.MeterMonthRefVE (
+  PeriodYear: Integer,
+  MonthNo: Integer,
+  TotalKwh: Decimal
+) as (
+  select m.ID                      as MeterRef
+  ,      datepart(YEAR, r.ReadAt)  as PeriodYear
+  ,      datepart(MONTH, r.ReadAt) as MonthNo
+  ,      sum(r.Kwh)                as TotalKwh
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.ID, datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
+);
+
+create association Trends.MeterRef
+  from Trends.MeterMonthRefVE to Trends.Meter
+  type Reference
+  owner Default;
