@@ -1,0 +1,46 @@
+-- The other way to carry a reference: a string copy of the id.
+--
+-- cast(m.ID as string) is NOT an association - it is a plain attribute, and
+-- that is the point. One statement instead of two, no objects materialised in
+-- the client, and the id is still there to retrieve the real object with when
+-- something actually needs it.
+--
+-- Derived string columns must be String(200): a cast is derived, so declaring
+-- String(20) here fails the build with CE6770, caught pre-build as MDL031.
+
+@position(1100, 700)
+create or modify view entity Trends.MeterMonthIdVE (
+  MeterId: String(200),
+  MeterCode: String(20),
+  PeriodYear: Integer,
+  MonthNo: Integer,
+  TotalKwh: Decimal
+) as (
+  select cast(m.ID as string)      as MeterId
+  ,      m.MeterCode               as MeterCode
+  ,      datepart(YEAR, r.ReadAt)  as PeriodYear
+  ,      datepart(MONTH, r.ReadAt) as MonthNo
+  ,      sum(r.Kwh)                as TotalKwh
+  from   Trends.Reading as r
+    inner join r/Trends.Reading_Meter/Trends.Meter as m
+  group by m.ID, m.MeterCode, datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
+);
+
+create or modify odata service Trends.IdApi (
+  path: 'odata/ids/v1/', version: '1.0.0', ODataVersion: OData4,
+  namespace: 'Ids', ServiceName: 'IdApi', Summary: 'The id carried as a string'
+)
+authentication basic
+{
+  publish entity Trends.MeterMonthIdVE as 'MeterMonthId' (
+    ReadMode: source, InsertMode: not_supported,
+    UpdateMode: not_supported, DeleteMode: not_supported
+  )
+  expose (
+    MeterId    as 'meterId'    (key, Filterable, Sortable),
+    PeriodYear as 'periodYear' (key, Filterable, Sortable),
+    MonthNo    as 'monthNo'    (key, Filterable, Sortable),
+    MeterCode  as 'meterCode'  (Filterable, Sortable),
+    TotalKwh   as 'totalKwh'   (Filterable, Sortable)
+  );
+};

@@ -1,24 +1,15 @@
 -- A view entity with an association to a persistent entity.
 --
--- Selecting a persistent entity's id under an alias is how a view entity gets
--- an association: the alias becomes the association name, and the column is
--- NOT one of the view entity's attributes. Studio Pro creates the association
--- member when you add the column.
+-- Selecting a persistent entity's id under an alias IS the declaration: the
+-- alias becomes the association's name, and the id column is not one of the
+-- view entity's attributes. There is no second statement for it.
 --
--- This script gets you as far as mxcli can (nightly-20260909): it needs
--- --no-check, because the checker aligns the select columns against the
--- declared attributes without skipping the id column, and the association it
--- creates is missing the one field that marks it as an OQL view association.
--- See docs/07-view-entity-associations.md; tools/add-oql-view-association.py
--- adds that field.
---
---   ./mxcli exec ../mdl/30-view-entity-association.mdl -p ViewEntityExamples.mpr --no-check
---   python3 ../tools/add-oql-view-association.py \
---       mprcontents/9b/40/9b4023c4-7311-46a1-b816-8db00d50f686.mxunit MeterRef
+-- Needs mxcli with ako/mxcli#452 ("View entities and widget bodies"). Before
+-- that fix, check mis-aligned the columns, exec wrote no association, and the
+-- build refused the model - see FINDINGS 1, which this script is the repro for.
 --
 -- The alias may not collide with an entity name in the module, case-insensitively:
--- `as meter` next to entity Trends.Meter is "Duplicate name 'Meter' in module
--- 'Trends'. Entities, associations and enumerations cannot share names."
+-- `as meter` next to Trends.Meter is "Duplicate name 'Meter' in module 'Trends'".
 
 @position(600, 700)
 create or modify view entity Trends.MeterMonthRefVE (
@@ -35,7 +26,24 @@ create or modify view entity Trends.MeterMonthRefVE (
   group by m.ID, datepart(YEAR, r.ReadAt), datepart(MONTH, r.ReadAt)
 );
 
-create association Trends.MeterRef
-  from Trends.MeterMonthRefVE to Trends.Meter
-  type Reference
-  owner Default;
+-- Two of this grid's columns are read over the association, which is what
+-- makes the second retrieve visible in the log.
+create or replace page Trends.MeterRefGrid
+(
+  Title: 'Monthly totals, with the meter behind them',
+  Layout: Atlas_Core.Atlas_Default,
+  Url: 'meter-ref'
+)
+{
+  TITLE ttlRef (Content: 'Monthly totals, with the meter behind them')
+  DYNAMICTEXT dtRefSub (Content: 'Meter and Region are read over the association, not stored on the view entity.')
+  DATAGRID gridRef (DataSource: DATABASE Trends.MeterMonthRefVE, PageSize: 15)
+  {
+    COLUMN colRefCode (Attribute: MeterRef/MeterCode, Caption: 'Meter')
+    COLUMN colRefRegion (Attribute: MeterRef/Region, Caption: 'Region')
+    COLUMN colRefYear (Attribute: PeriodYear, Caption: 'Year', Alignment: right)
+    COLUMN colRefMonth (Attribute: MonthNo, Caption: 'Month', Alignment: right)
+    COLUMN colRefKwh (Attribute: TotalKwh, Caption: 'Total kWh', Alignment: right)
+  }
+}
+;

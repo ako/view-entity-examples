@@ -1,0 +1,32 @@
+Errors the shaping and composing examples run into, captured with mxcli check
+(ako/mxcli#452 build) against ViewEntityExamples.mpr, Mendix 10.24.24.119653.
+
+1. A derived string column declared at its own length
+   create or modify view entity Trends.ProbeVE ( MeterId: String(20) ) as (
+     select cast(m.ID as string) as MeterId from Trends.Meter as m );
+
+   attribute 'MeterId': declared as String(20) but OQL expression returns
+   String(200)                                                       [MDL031]
+   -> Fix: change to 'MeterId: String(200)'
+
+   A pass-through column keeps its own length; anything DERIVED - a cast, a
+   concatenation, a case expression - is String(200), the platform default.
+   MxBuild reports the same disagreement as CE6770 "View Entity is out of sync
+   with the OQL Query".
+
+2. An association alias that collides with an entity name
+   select m.ID as meter ...        -- next to entity Trends.Meter
+
+   ERROR at Trends, Domain model, Entity 'Trends.Meter': Duplicate name 'Meter'
+   in module 'Trends'. Entities, associations and enumerations cannot share
+   names.                                                     (mxbuild 10.24)
+
+3. A plain association to or from a view entity
+   create association Trends.MeterRef
+     from Trends.MeterMonthRefVE to Trends.Meter type Reference owner Default;
+
+   cannot create association Trends.MeterRef: Trends.MeterMonthRefVE is a view
+   entity - Mendix does not allow a plain association to or from one (CE6771).
+     A view entity gets an association by SELECTING THE TARGET'S ID under an
+     alias, which is also the association's name:
+         select t.ID as MeterRef, ...
