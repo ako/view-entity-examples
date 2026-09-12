@@ -91,9 +91,13 @@ app/     the Mendix project
 mdl/     the MDL that builds it, in order
          01-04  example 1: domain, view entities, service, demo data
          10-14  example 2: trends domain, unioned view, service, data, startup
+         20-21  example 3: the plain view entity and the page that reads it
+         30     example 4: the view entity with an association (see FINDINGS 1)
          99     the blocked key, applied on purpose to reproduce the error
-docs/    the write-up, the captured build error, $metadata and responses
+docs/    the write-up, the captured build error, $metadata, responses, SQL
 requests/ .http files against the running app
+tools/   one-off model surgery mxcli cannot do yet
+video/   the three explainer films and the pipeline that builds them
 ```
 
 Every model change is in [`mdl/`](mdl); the app can be rebuilt from an empty
@@ -139,6 +143,14 @@ requests in [`requests/trends.http`](requests/trends.http).
 Everything on screen comes from the captured artefacts in `docs/`. The pipeline
 (narration first, picture timed to it, one deck per film) is documented in
 [`video/README.md`](video/README.md).
+
+## What broke on the way
+
+[`FINDINGS.md`](FINDINGS.md) logs what was surprising or broken while building
+this — mostly mxcli gaps, each with the version it was seen on and how it was
+established. The largest is that a view entity's association to a persistent
+entity cannot be written from the command line on either 10.24 or 11.14, and
+that the difference turns out to be a single field in the model unit.
 
 ## Versions
 
