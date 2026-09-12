@@ -83,3 +83,27 @@ then cut by about 40s after the first audio build measured 359s.
 One thing the type's own numbers do not cover: a beginner film needs more
 frames for the same material, because each frame carries less. 22 frames for
 five minutes is the floor, not the ceiling.
+
+
+## Photographed frames
+
+Film 3 carries three frames that are screenshots of Studio Pro 11.14.0 Beta
+rather than output captured from the running app: the OQL editor, the data
+grid's datasource dialog, and a text filter sitting in a column. They exist
+because the editor is the one thing this pipeline cannot photograph — mxcli
+writes the model, but nobody can screenshot a dialog that was never opened.
+
+Three rules keep them honest and keep them inside the system:
+
+1. **Each names its version in the sub line.** The rest of the film is
+   10.24.24.119653; these three say `Studio Pro 11.14.0 Beta`, because the
+   editor they show is a newer one.
+2. **Cropped, never upscaled.** Each is cut to the region that carries the
+   point and shown at or below its own pixel size (`.shot`, max-height 452px),
+   so nothing is interpolated. The originals are in `docs/shots/sp-*.png`.
+3. **A hairline, no card.** One 1px `--line` border, flush left with the
+   type — framed as evidence rather than dressed up.
+
+One is a bright white rectangle in a dark film: the page editor's preview of an
+Atlas page. It was cropped down to the header band to reduce the area, and left
+as it is otherwise. The alternative was to not show the thing the frame is about.

@@ -130,10 +130,11 @@ requests in [`requests/trends.http`](requests/trends.http).
 
 [`video/`](video) builds a narrated walkthrough of each example:
 
-- **`view-entities-101.mp4`** (5m28s) — what a view entity is, for someone who
+- **`view-entities-101.mp4`** (5m31s) — what a view entity is, for someone who
   has never written a query: table/row/column, the three OQL clauses, the view
   under a data grid, and what the database is asked as you sort, page and
-  filter. Ends on the plans and the three errors you meet first.
+  filter. Ends on the plans and the three errors you meet first. Three frames
+  are photographed in Studio Pro 11.14 rather than captured here, and say so.
 - **`view-entity-odata-key.mp4`** (5m40s) — domain model, the OQL and what the
   fan-out term does to it, the build error, the non-unique key, both
   workarounds, then the SQL and the query plan the OData call produces.

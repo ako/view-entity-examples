@@ -51,6 +51,11 @@ no list variable.
 
 ![the grid on Trends.MeterMonths](shots/meter-months-grid.png)
 
+And the same page in the editor, where the datasource is set — `Type: Database`,
+`Entity (path): MeterMonthVE`, nothing in between:
+
+![the data grid's datasource](shots/sp-grid-datasource.png)
+
 What the grid then does is the point
 ([`sql/08-grid-retrieve.sql`](sql/08-grid-retrieve.sql), captured with
 `ConnectionBus_Retrieve` at TRACE):
@@ -89,10 +94,24 @@ ORDER BY "Trends.MeterMonthVE"."MonthNo" ASC LIMIT ?
 -- Select params 1-3: M-004, 2025, 3000
 ```
 
+### The filter, as Studio Pro authors it
+
+![a text filter in the Meter column](shots/sp-page-filter-placed.png)
+
+A Data Grid 2 filter is a widget **in a column**: the grid carries
+*Show column filter: Yes*, every column header renders a `PLACE FILTER WIDGET
+HERE` drop target, and the filter takes its datasource from the column it sits
+in. Which is why nothing in the editor ever asks for a `linkedDs` — and why the
+per-column `FILTER` block that MDL already parses is the right shape.
+
+![the text filter's settings](shots/sp-text-filter-dialog.png)
+
 ### One thing this repo could not build
 
-A Data Grid 2 column filter would show the same pushdown from the grid itself.
-It is not in the page because mxcli (nightly-20260909) cannot write one: a
+That filter is in a copy of the page opened in Studio Pro 11.14, not in the
+model this repo builds. A column filter would show the same pushdown from the
+grid itself, and it is not in the committed page because mxcli
+(nightly-20260909) cannot write one: a
 per-column `FILTER` block parses and is dropped on write, and a filter placed
 in the grid's `controlbar` slot needs `linkedDs`, which the same build reports
 as "recognized but not yet persisted" (MDL-WIDGET06). Written without the link,

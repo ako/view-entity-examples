@@ -13,8 +13,8 @@
 return [
 {
   id: "title", label: "", kind: "declarative",
-  narration: "A view entity is a question you save in your app. The database answers it from scratch every time someone asks. No database experience needed.",
-  steps: 1, cues: [{ step: 1, s: 2 }],
+  narration: "A view entity is a question you save in your app, and the database answers it from scratch every time someone asks. No database experience needed.",
+  steps: 1, cues: [{ step: 1, s: 1 }],
   noChrome: true,
   html: `
     <div class="tag">Mendix 10.24.24 &middot; view entities &middot; from zero</div>
@@ -28,8 +28,8 @@ return [
 },
 {
   id: "words", label: "Three words first", kind: "command",
-  narration: "Three words first. A table is a grid the database keeps on disk. A row is one entry in it; a column is one field of it. Every entity you draw in Mendix is a table, and every object is a row.",
-  steps: 2, cues: [{ step: 1, s: 2 }, { step: 2, s: 2 }],
+  narration: "Three words. A table is a grid the database keeps on disk; a row is one entry in it, a column one field of it. Every entity you draw in Mendix is a table, every object a row.",
+  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 1 }],
   html: `
     <h2>Table, row, column</h2>
     <p class="sub">The whole vocabulary you need for this film</p>
@@ -77,8 +77,8 @@ return [
 },
 {
   id: "question", label: "The question", kind: "result",
-  narration: "Now the question. How much energy did each meter use, per month? Nobody stored that, so it has to be worked out. The only choice is where.",
-  steps: 2, cues: [{ step: 1, s: 2 }, { step: 2, s: 3 }],
+  narration: "How much energy did each meter use, per month? Nobody stored that, so it has to be worked out. The only choice is where.",
+  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
   html: `
     <h2>&ldquo;How much energy did each meter use, per month?&rdquo;</h2>
     <p class="sub">An answer nobody wrote down</p>
@@ -100,8 +100,8 @@ return [
 },
 {
   id: "what", label: "The idea", kind: "command",
-  narration: "So that is what a view entity is. A saved question, not a table. Nothing is stored and nothing is kept in sync, so there is no copy that can go stale.",
-  steps: 2, cues: [{ step: 1, s: 2 }, { step: 2, s: 3 }],
+  narration: "A view entity is a saved question, not a table. Nothing is stored and nothing is kept in sync, so there is no copy that can go stale.",
+  steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 1 }],
   html: `
     <h2>A saved question, not a table</h2>
     <p class="sub">What is and is not on disk</p>
@@ -123,7 +123,7 @@ return [
 },
 {
   id: "oql", label: "OQL", kind: "command",
-  narration: "The question is written in OQL, Mendix's query language. Three clauses do nearly all the work: which columns you want, where to get them, and what to group rows on.",
+  narration: "The question is written in OQL. Three clauses do nearly all the work: which columns you want, where to get them, and what to group rows on.",
   steps: 3, cues: [{ step: 1, s: 1 }, { step: 2, s: 1 }, { step: 3, s: 1 }],
   html: `
     <h2>Three clauses</h2>
@@ -153,8 +153,8 @@ return [
 },
 {
   id: "view", label: "The view entity", kind: "command",
-  narration: "Here is the real one, whole. Six columns out, readings joined to their meter, grouped by meter, year and month. That is what makes one row per meter per month.",
-  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
+  narration: "Here it is whole. Six columns out, readings joined to their meter, grouped by meter, year and month, which is what makes one row per meter per month.",
+  steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 1 }],
   html: `
     <h2>The whole view entity</h2>
     <p class="sub">mdl/20-basics-view.mdl</p>
@@ -171,6 +171,18 @@ return [
   <span class="mark" data-step="2"><span class="kw">group by</span> m.MeterCode, m.Region, <span class="kw">datepart</span>(YEAR, r.ReadAt), <span class="kw">datepart</span>(MONTH, r.ReadAt)</span>
 );</pre>
     </div>`
+},
+{
+  id: "sp-oql", label: "In the editor", kind: "command",
+  narration: "You do not have to write it as a script. Here is the same view entity in Studio Pro, with a Run Query button next to it.",
+  steps: 1, cues: [{ step: 1, s: 2 }],
+  html: `
+    <h2>The same query, in the editor</h2>
+    <p class="sub">Trends.MeterMonthVE &middot; Studio Pro 11.14.0 Beta</p>
+    <img class="shot" src="shots/oql-editor.png" alt="">
+    <p class="note step" data-step="1">Ten lines, and the columns it will return listed underneath.
+       <span class="accent">Run Query</span> answers it against the running app, so you can see the
+       rows before anything is built on them.</p>`
 },
 {
   id: "rule", label: "The one rule", kind: "result",
@@ -239,21 +251,11 @@ return [
   steps: 1, cues: [{ step: 1, s: 2 }],
   html: `
     <h2>The grid's datasource is the view entity</h2>
-    <p class="sub">mdl/21-basics-page.mdl</p>
-    <div class="card">
-<pre><span class="kw">create page</span> Trends.MeterMonths (
-  Title: 'Energy per meter per month', Url: 'meter-months'
-) {
-  <span class="kw">DATAGRID</span> gridMeterMonth (
-    DataSource: <span class="mark" data-step="1"><span class="kw">DATABASE</span> Trends.MeterMonthVE</span>, PageSize: 15
-  ) {
-    <span class="kw">COLUMN</span> colMeter (Attribute: MeterCode, Caption: 'Meter')
-    ...  <span class="cm">-- 5 more columns</span>
-  }
-}</pre>
-    </div>
-    <p class="note">A view entity is used exactly like any other entity. That is the point
-       of it having a name.</p>`
+    <p class="sub">Trends.MeterMonths &middot; Studio Pro 11.14.0 Beta</p>
+    <img class="shot" src="shots/grid-datasource.png" alt="">
+    <p class="note step" data-step="1">Type <span class="accent">Database</span>, entity
+       <code>MeterMonthVE</code>. A view entity is used exactly like any other entity &mdash;
+       that is the point of it having a name.</p>`
 },
 {
   id: "running", label: "The page", kind: "result",
@@ -303,8 +305,8 @@ M-006    Region 6   2023      8         782         31
 },
 {
   id: "sql", label: "What it asked", kind: "result",
-  narration: "This is what it asked for. Your view entity's query, wrapped in a second one. Order by total kilowatt hours, limit fifteen. The sorting happened in the database.",
-  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
+  narration: "This is what it asked for: your view entity's query, wrapped in a second one. Order by total kilowatt hours, limit fifteen. The sorting happened in the database.",
+  steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 1 }],
   html: `
     <h2>One click, one statement</h2>
     <p class="sub">ConnectionBus_Retrieve at TRACE &middot; docs/sql/08-grid-retrieve.sql &middot; abridged</p>
@@ -323,7 +325,7 @@ M-006    Region 6   2023      8         782         31
 },
 {
   id: "paging", label: "Paging", kind: "result",
-  narration: "Next page adds one word. Offset: fifteen rows, skipping the first fifteen. The runtime says so in its own log.",
+  narration: "Next page adds one word. Offset: fifteen rows, skipping the first fifteen. The runtime says so in its log.",
   steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
   html: `
     <h2>Next page adds one word</h2>
@@ -339,9 +341,20 @@ ConnectionBus_Retrieve: Data table Trends.MeterMonthVE <span class="accent">(15 
        question was worth. The difference stayed where it was.</p>`
 },
 {
+  id: "sp-filter", label: "A filter is a widget", kind: "command",
+  narration: "On the page, a filter is a widget you drop into a column: here, a text filter on Meter. Wherever the condition comes from, it ends up in the same place.",
+  steps: 1, cues: [{ step: 1, s: 1 }],
+  html: `
+    <h2>A filter is a widget in the column</h2>
+    <p class="sub">Trends.MeterMonths &middot; Studio Pro 11.14.0 Beta</p>
+    <img class="shot" src="shots/column-filter.png" alt="">
+    <p class="note step" data-step="1">One filter, in the Meter column. Every other column is still an
+       empty drop target &mdash; <span class="accent">a filter belongs to a column</span>, not to the grid.</p>`
+},
+{
   id: "filter", label: "Filtering", kind: "result",
-  narration: "Filtering works the same way. Ask for one meter in one year, and the condition lands in the where clause as a parameter. Twelve rows come back. The condition travelled to the data, not the data to the condition.",
-  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 3 }],
+  narration: "Ask this view for one meter in one year, and the condition lands in the where clause as a parameter. Twelve rows come back. The condition travelled to the data, not the data to the condition.",
+  steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 2 }],
   html: `
     <h2>The condition goes into the query</h2>
     <p class="sub">docs/sql/09-filter-pushdown-101.sql &middot; the same view entity, asked for a slice</p>
@@ -361,8 +374,8 @@ GET .../MeterMonth?$filter=meterCode eq 'M-004' <span class="kw">and</span> peri
 },
 {
   id: "plan-what", label: "Query plans", kind: "command",
-  narration: "So the database is doing the work. What is it actually doing? Before running a query it writes a plan: the steps it will take. You can ask to see it.",
-  steps: 2, cues: [{ step: 1, s: 3 }, { step: 2, s: 4 }],
+  narration: "So the database is doing the work, but what is it actually doing? Before running a query it writes a plan: the steps it will take, and you can ask to see it.",
+  steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 1 }],
   html: `
     <h2>A plan is the recipe, written down</h2>
     <p class="sub">How to read one, in three lines</p>
@@ -386,8 +399,8 @@ GET .../MeterMonth?$filter=meterCode eq 'M-004' <span class="kw">and</span> peri
 },
 {
   id: "plan-all", label: "The whole view", kind: "result",
-  narration: "Here is the plan for the whole view, unfiltered. Bottom line first: read six thousand five hundred and seventy readings, join them to six meters, collapse them to two hundred and sixteen rows. Six milliseconds.",
-  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
+  narration: "The plan for the whole view, unfiltered. Bottom line first: read six thousand five hundred and seventy readings, join them to six meters, collapse them to two hundred and sixteen rows.",
+  steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 1 }],
   html: `
     <h2>Nothing filtered: every reading is touched</h2>
     <p class="sub">EXPLAIN ANALYZE &middot; docs/sql/10-plan-101.txt &middot; 8 of 12 plan lines</p>
@@ -407,8 +420,8 @@ GET .../MeterMonth?$filter=meterCode eq 'M-004' <span class="kw">and</span> peri
 },
 {
   id: "plan-filtered", label: "Filtered", kind: "result",
-  narration: "Now the same view, asked for one meter in one year. The filter has moved to the bottom. The meter is found through an index, and four thousand three hundred and eighty-six readings are dropped before anything is added up.",
-  steps: 2, cues: [{ step: 1, s: 2 }, { step: 2, s: 2 }],
+  narration: "Now the same view, asked for one meter in one year. The filter has moved to the bottom: the meter is found through an index, and four thousand three hundred and eighty-six readings are dropped before anything is added up.",
+  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 1 }],
   html: `
     <h2>The filter sinks to the bottom</h2>
     <p class="sub">EXPLAIN ANALYZE &middot; docs/sql/10-plan-101.txt &middot; 9 of 23 plan lines</p>
@@ -427,7 +440,7 @@ GET .../MeterMonth?$filter=meterCode eq 'M-004' <span class="kw">and</span> peri
 },
 {
   id: "numbers", label: "What to read", kind: "result",
-  narration: "If you read one thing in a plan, read the row counts at the bottom. Milliseconds move with the machine; rows touched is the honest number. Notice what the index did and did not do.",
+  narration: "Read the row counts at the bottom. Rows touched is the honest number; milliseconds move with the machine. Notice what the index did and did not do.",
   steps: 3, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }, { step: 3, s: 2 }],
   html: `
     <h2>Rows touched, not milliseconds</h2>
@@ -455,7 +468,7 @@ GET .../MeterMonth?$filter=meterCode eq 'M-004' <span class="kw">and</span> peri
 },
 {
   id: "errors", label: "What goes wrong", kind: "result",
-  narration: "Three errors you will meet writing your first one, with their real text. All three are caught before the app builds, which is the good news.",
+  narration: "Three errors you will meet writing your first one, with their real text. All three are caught before the app builds.",
   steps: 3, cues: [{ step: 1, s: 1 }, { step: 2, s: 1 }, { step: 3, s: 2 }],
   html: `
     <h2>The three you will actually hit</h2>
@@ -477,7 +490,7 @@ must also specify a limit clause                         [MDL030]</pre>
 },
 {
   id: "recap", label: "All of it", kind: "result",
-  narration: "That is the whole film on one screen. A view entity is a saved question, asked in three clauses, where every selected column is a key or an aggregate. Sorting, paging and filtering become order by, limit and where. The plan tells you what really happened.",
+  narration: "The whole film on one screen. A view entity is a saved question, asked in three clauses, where every column you select is a key or an aggregate. Sorting, paging and filtering become order by, limit and where, and the plan tells you what really happened.",
   steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
   html: `
     <h2>All of it, on one screen</h2>
