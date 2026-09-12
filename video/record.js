@@ -1,6 +1,13 @@
 //
 // The picture, timed from the audio that already exists.
 //
+// No burned-in captions (DESIGN-LANGUAGE.md §3): the bottom 17% is a keep-out
+// band and stays clear. What the caption bar used to provide besides text was
+// continuous motion - Playwright records the frames the compositor produces, so
+// a still reading tail can collapse to almost no video and the linear map in
+// assemble.js then stretches the wrong way. That job moved to the chrome
+// hairline, which draws across the scene's own duration inside the chrome band.
+//
 // One context per scene, so each clip is its own file and a frame-rate wobble
 // in scene 9 cannot push scene 12 out of sync. The alternative - one long take
 // cut afterwards - needs the recorder's clock mapped onto the video's, and that
@@ -11,13 +18,15 @@
 // the canvas, it does not scale it.
 //
 const { chromium } = require('playwright');
-const narrate = require('./narrate.js');
 const { deck } = require('./deck.js');
 const fs = require('fs');
 const path = require('path');
 
 const SIZE = { width: 1920, height: 1080 };
-const TAIL = 0.9;          // let the last caption land before the cut
+// Tails are the type's, not a single global number (TONE-AND-SPEED.md, Type C):
+// a command frame holds 1.5s after its line because the viewer is watching
+// typing; a result frame holds 3.5s because they are reading a table.
+const TAIL = { result: 3.5, command: 1.5, declarative: 1.5 };
 const DECK = deck(process.argv);
 const RAW = DECK.rawDir;
 const CLIPS = DECK.clipDir;
@@ -62,7 +71,11 @@ const CLIPS = DECK.clipDir;
       events.push({ t: Math.min(at, t - 0.2), kind: 'step', step: cue.step });
     }
     events.sort((a, b) => a.t - b.t);
-    const total = t + TAIL;
+    // No reveal may be cut short by the narration ending: a frame whose last
+    // reveal is a query plan must not advance 1.5s after the sentence stops.
+    const tail = sc.tail || TAIL[sc.kind] || 1.5;
+    const lastCue = events.filter(e => e.kind === 'step').map(e => e.t).pop() || 0;
+    const total = Math.max(t + tail, lastCue + tail);
 
     // ANCHOR 1 of 2. Recording starts when the context is created - before the
     // navigation is even issued. Everything before the first caption is
@@ -74,19 +87,18 @@ const CLIPS = DECK.clipDir;
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
-    await page.goto(`${url}?deck=${DECK.name}&scene=${sc.index}`);
+    await page.goto(`${url}?deck=${DECK.name}&scene=${sc.index}&rule=${total.toFixed(2)}`);
     await page.waitForTimeout(500);          // let the scene's fade-in finish
-    await narrate.install(page);
 
     const t0 = Date.now();   // ANCHOR 2 of 2: the timeline starts here
     for (const ev of events) {
       const wait = ev.t * 1000 - (Date.now() - t0);
       if (wait > 0) await page.waitForTimeout(wait);
-      if (ev.kind === 'caption') {
-        await narrate.say(page, ev.text, sc.label, { holdMs: 1 });
-      } else {
-        await page.evaluate(k => window.showStep(k), ev.step);
-      }
+      // Captions are not burned in: the system keeps the bottom 17% clear and
+      // the caption band stays empty even when captions are off. The sentence
+      // boundaries still drive the timeline - they are what the reveals are
+      // cued to - they just no longer draw anything.
+      if (ev.kind === 'step') await page.evaluate(k => window.showStep(k), ev.step);
     }
     const left = total * 1000 - (Date.now() - t0);
     if (left > 0) await page.waitForTimeout(left);
@@ -110,7 +122,8 @@ const CLIPS = DECK.clipDir;
     // offset leaves the last seconds of every clip wrong.
     const wall = (tClose - tContext) / 1000;
     const preroll = (t0 - tContext) / 1000;
-    const row = { index: sc.index, id: sc.id, planned: Number(total.toFixed(2)),
+    const row = { index: sc.index, id: sc.id, kind: sc.kind, tail,
+                  planned: Number(total.toFixed(2)),
                   audio: sc.sec, video: Number(dur.toFixed(2)),
                   wall: Number(wall.toFixed(2)), preroll: Number(preroll.toFixed(2)),
                   scale: Number((dur / wall).toFixed(4)),
@@ -118,7 +131,7 @@ const CLIPS = DECK.clipDir;
     report.push(row);
     console.log(`  ${String(sc.index).padStart(2)} ${sc.id.padEnd(11)} ` +
       `audio ${row.audio.toFixed(1)}s  planned ${row.planned.toFixed(1)}s  ` +
-      `video ${row.video.toFixed(1)}s  preroll ${row.preroll.toFixed(2)}s  ` +
+      `tail ${tail.toFixed(1)}s  video ${row.video.toFixed(1)}s  preroll ${row.preroll.toFixed(2)}s  ` +
       `scale ${row.scale.toFixed(3)}` +
       (dur < sc.sec ? '   << SHORTER THAN ITS AUDIO' : ''));
   }

@@ -21,10 +21,18 @@ and its PostgreSQL actually produced.
 ```bash
 cd video
 npm install                                  # playwright (the browser is already in the image)
+sh scripts/make-bed.sh                       # the music bed, once
+node check.js      --deck union-grains       # conformance gate - refuses to build a bad deck
 node build-audio.js --deck union-grains      # narration first - every hold downstream is measured
 node record.js     --deck union-grains       # one clip per scene, timed from that audio
 node assemble.js   --deck union-grains       # mux, join, and write the contact sheet
 ```
+
+`check.js` is not advisory. It fails on a font that is not Recursive, a mono
+role that does not set the `MONO` axis, ligatures left on, more or fewer than
+one accent element in a frame, a light ground, a radius or shadow, anything
+outside the safe area, a glyph absent from the shipped cmap, or abbreviated
+output with no `... N more` marker. Run it before every render.
 
 `--deck` defaults to `odata-key`. `node preview.js --deck <name>` renders every
 scene as a still with all reveals shown — the cheap way to catch text
@@ -42,10 +50,12 @@ work here and are worth keeping if you adapt this:
   `build-audio.js` synthesises per *sentence* and records each clip's real
   duration with `ffprobe`; `record.js` holds each caption for exactly that long.
 - **Something animates the whole time.** Playwright captures the frames the
-  compositor produces, so a genuinely still screen during a reading pause can
-  collapse to almost no video — the pause disappears and the narration desyncs.
-  The spinning ring in `narrate.js`'s caption bar is what prevents that. It is
-  not a loading indicator and removing it silently breaks the timing.
+  compositor produces, so a genuinely still screen during a reading tail can
+  collapse and the linear clock map then stretches the wrong way. The burned-in
+  caption bar used to carry that motion; the system keeps the bottom 17% clear,
+  so the job moved to the chrome hairline, which draws across the scene's own
+  duration inside the chrome band. Measured after the change: a 6s still tail
+  records at 0.986x wall clock frozen and 1.133x with the hairline drawing.
 - **Look at every clip, not two of them.** `assemble.js` writes
   `capture/contact-sheet.png` — one frame from the middle of all twelve — because
   a reveal that fires one sentence early looks fine in isolation.
@@ -66,8 +76,10 @@ there is no cumulative drift to model and a re-record costs one scene.
 | `decks/<name>/scenes.js` | what is on screen, what is said, and when each reveal fires |
 | `decks/<name>/deck.json` | the film's title and output filename |
 | `deck.js` | resolves `--deck` to its scenes and its audio/capture directories |
+| `check.js` | the conformance gate - fails the build, runs on every scene |
+| `fonts/` | the shipped Recursive variable file and its cmap |
+| `scripts/` | cmap dump, the Kokoro bridge, the music bed |
 | `shell.html`, `style.css` | the page — `?deck=<name>&scene=N`, `showStep(k)` |
-| `narrate.js` | the caption bar, copied from the mxcli skill, unmodified |
 | `build-audio.js` | Piper → two-pass loudnorm → `audio/manifest.json` |
 | `record.js` | one clip per scene, both clock anchors recorded |
 | `assemble.js` | mux, concat, contact sheet |

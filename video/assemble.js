@@ -12,8 +12,8 @@ const fs = require('fs');
 
 const { deck } = require('./deck.js');
 const DECK = deck(process.argv);
-const TAIL = 0.9;
 const OUT = DECK.outDir;
+const BED = 'audio/bed.wav';
 fs.mkdirSync(OUT, { recursive: true });
 
 const manifest = JSON.parse(fs.readFileSync(DECK.manifest, 'utf8'));
@@ -28,7 +28,7 @@ for (const sc of manifest) {
   const vin = `${DECK.clipDir}/scene-${n}.webm`;
   const ain = `${DECK.audioDir}/scene-${n}.wav`;
   const out = `${OUT}/scene-${n}.mp4`;
-  const target = sc.sec + TAIL;
+  const target = sc.sec + (sc.tail || 1.5);
   const have = dur(vin);
   const a = anchors.find(x => x.index === sc.index);
 
@@ -40,13 +40,23 @@ for (const sc of manifest) {
   const scale = a.scale;
   const head = a.preroll * scale;
 
+  // The bed sits under the narration and drops to near-silence under result
+  // frames - silence is a legitimate instruction to read (training-video.md).
+  const bedDb = sc.kind === 'result' ? -16 : 0;   // relative to the -32 LUFS bed
+  const bedAt = (sc.index * 7) % 60;              // a different stretch per scene
   const r = spawnSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error',
     '-ss', head.toFixed(3), '-i', vin, '-i', ain,
+    '-ss', String(bedAt), '-t', target.toFixed(3), '-i', BED,
     // hold the last frame if the capture came up short, then cut both streams
     // at the same instant so nothing accumulates into the next clip
     '-vf', `setpts=PTS/${scale.toFixed(5)},tpad=stop_mode=clone:stop_duration=5,` +
            `fps=30,scale=1920:1080,format=yuv420p`,
-    '-af', `apad=pad_dur=5`,
+    '-filter_complex',
+      `[1:a]apad=pad_dur=5,atrim=0:${target.toFixed(3)}[v];` +
+      `[2:a]volume=${bedDb}dB,afade=t=in:st=0:d=0.8,` +
+        `afade=t=out:st=${Math.max(0, target - 1.0).toFixed(2)}:d=1.0[b];` +
+      `[v][b]amix=inputs=2:duration=first:normalize=0[a]`,
+    '-map', '0:v', '-map', '[a]',
     '-t', String(target.toFixed(3)),
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-profile:v', 'high',
     '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2',

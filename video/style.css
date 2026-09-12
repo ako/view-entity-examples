@@ -1,81 +1,144 @@
+/* The shared design language, as specified in video-system/DESIGN-LANGUAGE.md.
+   Ground and palette §1, type §2, grid §3, plane §4. Nothing here is a local
+   choice; where a value looks arbitrary it is quoted from that file. */
+
+@font-face{font-family:"Recursive";font-weight:300 1000;font-style:normal;
+  font-display:block;
+  src:url("fonts/Recursive_VF.woff2") format("woff2-variations");}
+
 :root{
-  --bg:#0b1220; --panel:#111c31; --panel2:#0e1728; --line:#1e2f4d;
-  --ink:#e8eefc; --dim:#93a4c4; --faint:#5d6e8e;
-  --mx:#0595db; --mx2:#25b3ea; --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
-  --key:#a78bfa;
+  --bg:#0e1116;      /* ground, full bleed                        */
+  --panel:#181A1A;   /* the only inset surface                    */
+  --line:#262828;    /* 1px hairline, carries all structure       */
+  --ink:#e6edf3;     /* primary       16.0:1                      */
+  --dim:#98a3b3;     /* secondary      7.41:1                     */
+  --faint:#6b7787;   /* chrome labels  4.15:1, 24px+ mono only    */
+  --accent:#3fbdb8;  /* the only colour                           */
 }
+
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
+/* Ligatures off globally and deliberately: a code ligature composes != into a
+   single glyph, and these frames present captured SQL verbatim. */
 body{
   background:var(--bg); color:var(--ink);
-  font:400 22px/1.5 'Segoe UI',system-ui,-apple-system,sans-serif;
+  font-family:"Recursive",sans-serif;
+  font-variation-settings:"MONO" 0,"CASL" 0,"slnt" 0,"CRSV" 0;
+  font-variant-ligatures:none;
+  font-feature-settings:"liga" 0,"clig" 0,"calt" 0,"dlig" 0;
+  font-weight:400; font-size:30px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
   overflow:hidden;
 }
-#stage{position:absolute;inset:0 0 86px 0;padding:44px 64px 20px;display:none;
-       flex-direction:column;justify-content:center}
+code,pre,.mono,table,.seg,.ent{
+  font-family:"Recursive",monospace;
+  font-variation-settings:"MONO" 1,"CASL" 0,"slnt" 0,"CRSV" 0;
+}
+
+/* ---- §3 the grid ------------------------------------------------------ */
+#chrome-l,#chrome-r{
+  position:absolute; top:52px; height:32px; line-height:32px;
+  font-family:"Recursive",monospace; font-variation-settings:"MONO" 1;
+  font-size:24px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--faint); white-space:nowrap;
+}
+#chrome-l{left:96px}
+#chrome-r{right:96px; text-align:right}
+/* The chrome hairline doubles as the only continuously moving element in the
+   frame. Playwright records the frames the compositor produces, so a wholly
+   still screen during a reading tail can collapse to almost no video and the
+   linear clock map in assemble.js then stretches the wrong way. Drawing this
+   1px rule across the scene keeps idle time recorded as idle time without
+   putting a second moving thing inside the content plane. */
+#chrome-rule{
+  position:absolute; left:96px; top:104px; height:1px; width:1728px;
+  background:var(--line); transform-origin:0 50%; transform:scaleX(0);
+}
+#stage{
+  position:absolute; left:96px; top:152px; width:1728px; height:728px;
+  display:none; flex-direction:column; justify-content:center;
+}
 #stage.on{display:flex}
-h1{font-size:58px;line-height:1.1;margin:0 0 18px;font-weight:650;letter-spacing:-.02em}
-h2{font-size:38px;line-height:1.15;margin:0 0 8px;font-weight:650;letter-spacing:-.015em}
-.sub{font-size:25px;color:var(--dim);margin:0 0 34px}
-.tag{display:inline-block;font-size:16px;letter-spacing:.14em;text-transform:uppercase;
-     color:var(--mx2);border:1px solid #14405c;background:#08243a;border-radius:999px;padding:6px 16px;margin-bottom:22px}
-.cols{display:flex;gap:34px;align-items:flex-start;min-height:0}
+.nochrome #chrome-l,.nochrome #chrome-r,.nochrome #chrome-rule{display:none}
+.nochrome #stage{top:152px;height:728px;justify-content:center;align-items:center;text-align:center}
+
+/* ---- type ------------------------------------------------------------- */
+h1{font-size:92px;line-height:1.06;margin:0 0 26px;font-weight:700;letter-spacing:-.03em}
+h2{font-size:52px;line-height:1.12;margin:0 0 10px;font-weight:600;letter-spacing:-.02em}
+h3{margin:0 0 16px;font-size:24px;font-weight:500;color:var(--faint);
+   letter-spacing:.14em;text-transform:uppercase;
+   font-family:"Recursive",monospace;font-variation-settings:"MONO" 1}
+.sub{font-size:30px;color:var(--dim);margin:0 0 30px}
+.note{color:var(--dim);font-size:28px;margin-top:20px}
+.tag{display:inline-block;font-size:24px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--faint);margin-bottom:26px;
+     font-family:"Recursive",monospace;font-variation-settings:"MONO" 1}
+b,strong{font-weight:700}
+
+/* ---- §4 the plane: flat. no radius, no shadow, no light ground -------- */
+.card{background:var(--panel);border:1px solid var(--line);padding:24px 26px}
+.cols{display:flex;gap:28px;align-items:flex-start;min-height:0}
 .col{flex:1;min-width:0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
-.card h3{margin:0 0 14px;font-size:20px;font-weight:600;color:var(--dim);
-         letter-spacing:.1em;text-transform:uppercase}
-code,pre,.mono{font-family:'Cascadia Mono',Consolas,'DejaVu Sans Mono',monospace}
-pre{margin:0;font-size:21px;line-height:1.62;white-space:pre;overflow:hidden}
-.kw{color:#7dd3fc}.str{color:#fca5a5}.num{color:#fcd34d}.fn{color:#c4b5fd}.cm{color:var(--faint);font-style:italic}
-table{border-collapse:collapse;width:100%;font-size:20px}
-th{font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
-   text-align:left;padding:0 14px 10px;font-weight:600;white-space:nowrap}
-td{padding:9px 14px;border-top:1px solid var(--line);white-space:nowrap}
-tr.hl td{background:#13263f}
-td.n{text-align:right;font-variant-numeric:tabular-nums}
-.enum{color:var(--mx2)}
-.keycol{color:var(--key)}
-.big{font-size:34px;font-weight:650}
-.note{color:var(--dim);font-size:21px;margin-top:14px}
-.bad{color:var(--bad)} .ok{color:var(--ok)} .warn{color:var(--warn)}
-.err{background:#2a1215;border:1px solid #5c2126;border-radius:12px;padding:20px 24px;
-     font-size:22px;line-height:1.5;color:#fecaca}
-/* progressive reveal driven by the recorder */
+pre{margin:0;font-size:30px;line-height:1.45;white-space:pre;overflow:hidden}
+
+/* Syntax roles carry emphasis, not hue - §1 allows one colour and it is spent
+   on the frame's single accent event. */
+.kw{color:var(--ink);font-weight:700}
+.str,.fn,.num{color:var(--ink)}
+.cm{color:var(--faint)}
+.dim{color:var(--dim)}
+
+table{border-collapse:collapse;width:100%;font-size:30px}
+th{font-size:24px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+   text-align:left;padding:0 18px 12px;font-weight:500;white-space:nowrap}
+td{padding:10px 18px;border-top:1px solid var(--line);white-space:nowrap;color:var(--ink)}
+td.n{text-align:right}
+tr.hl td{background:var(--panel)}
+
+/* the one accent event per frame */
+.accent{color:var(--accent)}
+.accent-bg{background:var(--panel);border-left:2px solid var(--accent)}
+.rule{height:2px;width:36px;background:var(--accent)}
+
+/* progressive reveal, driven by the recorder */
 .step{opacity:0;transition:opacity .5s ease}
 .step.show{opacity:1}
-.mark{background:transparent;border-radius:5px;padding:1px 4px;margin:0 -4px;
-      box-shadow:0 0 0 0 rgba(5,149,219,0);transition:all .45s ease}
-.mark.show{background:#0b3a55;box-shadow:0 0 0 2px #12607f}
-.mark.hot.show{background:#3a2a0b;box-shadow:0 0 0 2px #7a5a12}
+.mark{transition:color .45s ease}
+.mark.show{color:var(--accent)}
 
-/* ---- domain model, in the shape Studio Pro draws it ---- */
-.dm{position:relative;height:470px;margin-top:6px}
-.ent{position:absolute;width:340px;background:#f7fafc;color:#14243d;border:1px solid #9fb3cd;
-     border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.35);font-size:19px;overflow:hidden}
-.ent .hd{background:#1f6fb2;color:#fff;font-weight:600;padding:8px 12px;font-size:20px;
-         display:flex;justify-content:space-between;align-items:center}
-.ent.view .hd{background:#5b4b9e}
-.ent .hd .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
-.ent .at{display:flex;justify-content:space-between;gap:12px;padding:6px 12px;border-top:1px solid #dbe4ee}
-.ent .at .t{color:#5b7492;font-size:17px}
-.ent .at.e{background:#e8f5fd}
-.ent .at.e .n{color:#0568a0;font-weight:600}
-.ent .at.k .n{color:#6d4bc4;font-weight:600}
+/* ---- entity boxes: inset panel, hairline, no card ---------------------- */
+.dm{position:relative;height:560px}
+.ent{position:absolute;width:480px;background:var(--panel);border:1px solid var(--line);
+     font-size:30px;color:var(--ink)}
+.ent .hd{border-bottom:1px solid var(--line);padding:12px 18px;font-weight:700;
+         display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.ent .hd .k{font-size:24px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ent .at{display:flex;justify-content:space-between;gap:18px;padding:9px 18px}
+.ent .at .t{color:var(--dim);font-size:26px}
 .dm svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.dm .lbl{position:absolute;font-size:16px;color:var(--dim);background:var(--bg);padding:2px 8px}
-.callout{position:absolute;background:#08243a;border:1px solid #14405c;border-radius:10px;
-         padding:12px 16px;font-size:20px;color:#bfe6fb;max-width:330px}
+.dm .lbl{position:absolute;font-size:24px;color:var(--faint);background:var(--bg);padding:0 10px;
+         font-family:"Recursive",monospace;font-variation-settings:"MONO" 1}
+.callout{position:absolute;background:var(--panel);border:1px solid var(--line);
+         padding:18px 22px;font-size:28px;color:var(--dim);max-width:640px}
 
-/* ---- charts (single series: no legend, the title names it) ---- */
-.chart{--series-1:#3987e5}
-.chart .bars{display:flex;align-items:flex-end;gap:2px;height:190px;margin:6px 0 0}
-.chart .bars i{display:block;flex:1 1 0;min-width:3px;background:var(--series-1);
-               border-radius:4px 4px 0 0}
+/* ---- charts: one series, no legend - the panel title names it --------- */
+.chart .bars{display:flex;align-items:flex-end;gap:2px;height:200px;margin:8px 0 0}
+.chart .bars i{display:block;flex:1 1 0;min-width:3px;background:var(--dim)}
+.chart.accent-series .bars i{background:var(--accent)}
 .chart .xa{display:flex;justify-content:space-between;border-top:1px solid var(--line);
-           padding-top:8px;margin-top:0;font-size:16px;color:var(--faint)}
-.chart .peak{font-size:17px;color:var(--dim);margin-top:10px}
-.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);
-     border-radius:10px;overflow:hidden;margin-bottom:10px}
-.seg span{padding:9px 22px;font-size:20px;color:var(--dim);border-right:1px solid var(--line)}
+           padding-top:12px;font-size:24px;color:var(--faint);
+           font-family:"Recursive",monospace;font-variation-settings:"MONO" 1}
+.chart .peak{font-size:26px;color:var(--dim);margin-top:12px}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);margin-bottom:22px}
+.seg span{padding:10px 26px;font-size:28px;color:var(--dim);border-right:1px solid var(--line)}
 .seg span:last-child{border-right:0}
-.seg span.on{background:#12304d;color:#cfe9fb;font-weight:600}
+.seg span.on{color:var(--accent)}
+
+/* ---- §6 the closing lockup -------------------------------------------- */
+#lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;
+        width:100%;height:100%}
+#lockup .wm{font-size:200px;line-height:1;font-weight:700;letter-spacing:-.035em;
+            color:var(--ink);opacity:0;transform:scale(1.012)}
+#lockup .rule{margin:34px 0 30px;transform:scaleX(0);transform-origin:50% 50%}
+#lockup .take{font-family:"Recursive",monospace;font-variation-settings:"MONO" 1;
+              font-size:30px;color:var(--faint);opacity:0}

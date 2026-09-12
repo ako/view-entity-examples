@@ -1,8 +1,11 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Fan-out view entities and the OData key</title>
+<title>view entity films</title>
 <link rel="stylesheet" href="style.css">
 <body>
+<div id="chrome-l"></div>
+<div id="chrome-r"></div>
+<div id="chrome-rule"></div>
 <div id="stage"></div>
 <script>
   // The deck is chosen by query string so one page serves every film.
@@ -14,14 +17,20 @@
   const stage = document.getElementById('stage');
   let current = -1;
 
-  // Render one scene. Reveals start hidden; the recorder steps them in time
-  // with the narration so the viewer is never reading ahead of the voice.
+  // Chrome is drawn by the shell, not by the scenes: the grid is invariant and
+  // a scene that had to re-state it would be a scene that could get it wrong.
+  // DESIGN-LANGUAGE.md §3 - label left at baseline y76, index right-aligned to
+  // x1824, 1px hairline at y104. Suppressed on declarative frames.
   window.showScene = function (i) {
     if (i === current) return;
     current = i;
+    const sc = SCENES[i];
+    document.body.classList.toggle('nochrome', !!sc.noChrome);
+    document.getElementById('chrome-l').textContent = sc.label || '';
+    document.getElementById('chrome-r').textContent =
+      String(i + 1).padStart(2, '0') + ' / ' + String(SCENES.length).padStart(2, '0');
     stage.classList.remove('on');
-    stage.innerHTML = SCENES[i].html;
-    // force layout so the fade-in below is a real transition
+    stage.innerHTML = sc.html;
     void stage.offsetWidth;
     stage.classList.add('on');
   };
@@ -30,7 +39,47 @@
     document.querySelectorAll('[data-step="' + k + '"]').forEach(el => el.classList.add('show'));
   };
 
+  // Draw the chrome hairline across the scene's own duration. This is the
+  // scene's only continuous motion and it lives in the chrome band, not in the
+  // content plane.
+  window.runRule = function (seconds) {
+    const rule = document.getElementById('chrome-rule');
+    rule.style.transition = 'none';
+    rule.style.transform = 'scaleX(0)';
+    void rule.offsetWidth;
+    rule.style.transition = `transform ${seconds}s linear`;
+    rule.style.transform = 'scaleX(1)';
+  };
+
+  // The closing lockup (DESIGN-LANGUAGE.md §6): the wordmark settles at ~0.30s
+  // rather than at 0 - blooming it during the incoming crossfade turns both
+  // frames to mud - and the last 1.2s of the ~2.0s frame are dead still.
+  window.runLockup = function () {
+    const wm = document.querySelector('#lockup .wm');
+    const rule = document.querySelector('#lockup .rule');
+    const take = document.querySelector('#lockup .take');
+    if (!wm) return;
+    setTimeout(() => {
+      wm.style.transition = 'opacity .55s cubic-bezier(.16,.84,.44,1), transform .55s cubic-bezier(.16,.84,.44,1)';
+      wm.style.transform = 'scale(0.994)'; wm.style.opacity = '1';
+      setTimeout(() => {                       // the one permitted settle
+        wm.style.transition = 'transform .5s ease-in-out';
+        wm.style.transform = 'scale(1)';
+      }, 550);
+    }, 300);
+    setTimeout(() => {
+      rule.style.transition = 'transform .5s cubic-bezier(.16,.84,.44,1)';
+      rule.style.transform = 'scaleX(1)';
+    }, 550);
+    setTimeout(() => {
+      take.style.transition = 'opacity .6s ease';
+      take.style.opacity = '1';
+    }, 800);
+  };
+
   const n = Number(params.get('scene') || 0);
   showScene(n);
+  if (params.get('rule')) runRule(Number(params.get('rule')));
+  if (SCENES[n].kind === 'lockup') runLockup();
 </script>
 </body>
