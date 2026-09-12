@@ -93,6 +93,15 @@ and a Playwright load of the running page. This is why
 [`docs/06`](docs/06-view-entities-101.md) shows filter pushdown through the
 published OData resource instead of a typed grid filter.
 
+**What Studio Pro does**, from screenshots of this same page opened in 11.14
+Beta: the grid carries *Show column filter: Yes*, each column header renders a
+**PLACE FILTER WIDGET HERE** drop target, and a Text filter dropped into one
+gets `Filter attributes: Auto`, `Default filter: Contains`, `Apply after
+500 ms` — it takes its datasource from the column it sits in, which is why
+nothing in the editor ever asks for `linkedDs`. So the per-column `FILTER`
+block MDL already parses is the right shape; it is the write that is missing,
+and the placeholder form is a detour that cannot work without the link.
+
 ---
 
 ## 3. `DESCRIBE ENTITY` output for a view entity does not round-trip
@@ -135,7 +144,30 @@ re-run since, because it damages the project.
 
 ---
 
-## 5. Smaller things
+## 5. The skills are installed where a session does not look
+
+`mxcli init` had been run in this repo — 74 skills and 10 commands are
+committed — but it anchors them to the directory holding the `.mpr`, so they
+are at **`app/.claude/skills/`**. A session opened at the repository root (the
+normal thing to do here: the root holds `mdl/`, `docs/`, `video/` and the git
+history) surfaces none of them, and nothing says they exist.
+
+`mxcli init .` at the root does not fix it: it resolves to the project and
+re-initialises `app/` again, rewriting `app/CLAUDE.md`, `app/AGENTS.md` and
+`app/.devcontainer/devcontainer.json` with the new directory name and creating
+nothing at the root.
+
+**Verified** on nightly-20260909-ca9b90ed, in this repo. The cost is in §6:
+four separate things were worked out the slow way that the skills document.
+
+**Fix shape.** Either install a root-level pointer when the `.mpr` is not at the
+repository root, or have `init <dir>` honour the directory it was given. A
+`CLAUDE.md` at the root naming the path is the workaround this repo now
+carries.
+
+---
+
+## 6. Smaller things
 
 - **Mendix 10 CDN versions are four-part.** `10.24.24` does not resolve;
   `10.24.24.119653` does. The three-part number is the one a user has in their
@@ -148,10 +180,18 @@ re-run since, because it damages the project.
   `--direct --host localhost --port <admin-port>` is the way to be explicit.
   The default admin port (8090) also collides with a second app started on
   `--app-port 8090`, and the collision is reported against the app port.
+- **The Best Practice Recommender flags the seed microflow** (MXP005, *Commit
+  inside Loop*, 1 occurrence), seen in Studio Pro 11.14 on this project. It is
+  reading `Trends.ASu_CreateTrendData`, which commits one meter and one list of
+  1095 readings per iteration of a six-iteration loop. Left as it is
+  deliberately — the alternative is one commit of 6570 objects — but the
+  recommender is right that the shape is a loop with commits in it, and the
+  comment in `mdl/13-trends-data.mdl` says why.
 
 Four more things cost time in this repo and turned out to be **already
-documented in mxcli's own shipped skills**, so they are noted here as
-pointers rather than as findings: the `Year` reserved word and MDL071
+documented in mxcli's own shipped skills** (see §5 for why they were not read),
+so they are noted here as pointers rather than as findings: the `Year` reserved
+word and MDL071
 (`check-syntax`), `count()` not being a Mendix expression function and MDL044
 (`write-microflows`), an after-startup microflow having to return Boolean and
 CE0142 (`project-settings`, `demo-data`), and `mxcli new` needing
