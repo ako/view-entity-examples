@@ -342,35 +342,37 @@ ConnectionBus_Retrieve: Data table Trends.MeterMonthVE <span class="accent">(15 
 },
 {
   id: "sp-filter", label: "A filter is a widget", kind: "command",
-  narration: "On the page, a filter is a widget you drop into a column: here, a text filter on Meter. Wherever the condition comes from, it ends up in the same place.",
+  narration: "On the page, a filter is a widget you drop into a column: here, a text filter on Meter. Type into it, and the grid asks the database again.",
   steps: 1, cues: [{ step: 1, s: 1 }],
   html: `
     <h2>A filter is a widget in the column</h2>
-    <p class="sub">Trends.MeterMonths &middot; Studio Pro 11.14.0 Beta</p>
+    <p class="sub">Trends.MeterMonths, mid-edit in Studio Pro 11.14.0 Beta</p>
     <img class="shot" src="shots/column-filter.png" alt="">
-    <p class="note step" data-step="1">One filter, in the Meter column. Every other column is still an
-       empty drop target &mdash; <span class="accent">a filter belongs to a column</span>, not to the grid.</p>`
+    <p class="note step" data-step="1">A text filter, dropped into the Meter column; the others are
+       still empty drop targets. <span class="accent">A filter belongs to a column</span>, and it
+       filters that column's attribute.</p>`
 },
 {
   id: "filter", label: "Filtering", kind: "result",
-  narration: "Ask this view for one meter in one year, and the condition lands in the where clause as a parameter. Twelve rows come back. The condition travelled to the data, not the data to the condition.",
+  narration: "Type M dash zero zero four, and the condition lands in the where clause as a parameter. Thirty-six rows match; fifteen are fetched. The condition travelled to the data, not the data to the condition.",
   steps: 2, cues: [{ step: 1, s: 0 }, { step: 2, s: 2 }],
   html: `
-    <h2>The condition goes into the query</h2>
-    <p class="sub">docs/sql/09-filter-pushdown-101.sql &middot; the same view entity, asked for a slice</p>
+    <h2>What you typed is now in the query</h2>
+    <p class="sub">ConnectionBus_Retrieve at TRACE &middot; docs/sql/12-grid-filter.sql</p>
     <div class="card">
-<pre><span class="cm">-- what was asked for</span>
-GET .../MeterMonth?$filter=meterCode eq 'M-004' <span class="kw">and</span> periodYear eq 2025
-200  12 rows</pre>
+<pre><span class="kw">SELECT</span> "MeterCode", "Region", ...          <span class="cm">-- 4 more columns</span>
+<span class="kw">FROM</span> ( <span class="cm">-- the view entity, unchanged</span>
+       ... ) "Trends.MeterMonthVE"
+<span class="kw">WHERE</span> ? != ?
+  <span class="mark" data-step="1"><span class="kw">AND</span> "Trends.MeterMonthVE"."MeterCode" <span class="kw">ILIKE</span> ? <span class="kw">ESCAPE</span> '\\'</span>
+  <span class="kw">AND</span> ? != ? <span class="kw">LIMIT</span> ?
+<span class="cm">-- Select params 1-6: [6,[0]], #, %M-004%, [1,[]], #, 15</span></pre>
     </div>
-    <div class="card step" data-step="1" style="margin-top:26px">
-<pre><span class="cm">-- what the database was asked</span>
-<span class="kw">WHERE</span> ...  <span class="cm">-- 3 not-null guards</span>
-  <span class="kw">AND</span> "Trends.MeterMonthVE"."MeterCode" = ?
-  <span class="kw">AND</span> "Trends.MeterMonthVE"."PeriodYear" = ?
-<span class="kw">ORDER BY</span> "Trends.MeterMonthVE"."MonthNo" <span class="kw">ASC</span> <span class="kw">LIMIT</span> ?
-<span class="mark" data-step="2">-- params 1-3: M-004, 2025, 3000</span></pre>
-    </div>`
+    <div class="card step" data-step="2" style="margin-top:26px">
+<pre>ConnectionBus_Retrieve: Data table Trends.MeterMonthVE (15 from 36 row(s))</pre>
+    </div>
+    <p class="note step" data-step="2">Contains became <code>ILIKE</code> with the text you typed as a
+       parameter. 36 rows match; 15 crossed the wire.</p>`
 },
 {
   id: "plan-what", label: "Query plans", kind: "command",

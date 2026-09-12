@@ -16,15 +16,20 @@ create or replace page Trends.MeterMonths
   DYNAMICTEXT dtSub (Content: 'One row per meter per month, computed from 6570 readings when you ask for it.')
   DATAGRID gridMeterMonth (DataSource: DATABASE Trends.MeterMonthVE, PageSize: 15)
   {
-    -- No filter widget: a Data Grid 2 filter needs its `linkedDs` set to the
-    -- grid's own datasource, and this mxcli build recognises that property but
-    -- does not persist it (MDL-WIDGET06); a per-column FILTER block parses and
-    -- is dropped on write. A filter written without the link renders as
-    -- "Unable to get filter store. Check parent widget configuration."
-    -- Sorting and paging are enough to show what the grid pushes down.
-    COLUMN colMeter (Attribute: MeterCode, Caption: 'Meter', Sortable: true)
-    COLUMN colRegion (Attribute: Region, Caption: 'Region', Sortable: true)
-    COLUMN colYear (Attribute: PeriodYear, Caption: 'Year', Alignment: right, Sortable: true)
+    -- A Data Grid 2 filter is a widget INSIDE the column's own braces. The
+    -- `FILTER f { ... }` block in `mxcli syntax page widgets` is the GALLERY
+    -- form: it parses against a datagrid column too, and is then dropped on
+    -- write. The form below is the one that persists, and it is what Studio
+    -- Pro shows as a widget in the column's filter slot.
+    COLUMN colMeter (Attribute: MeterCode, Caption: 'Meter', Sortable: true) {
+      textfilter tfMeter (attribute: MeterCode, filtertype: contains)
+    }
+    COLUMN colRegion (Attribute: Region, Caption: 'Region', Sortable: true) {
+      textfilter tfRegion (attribute: Region, filtertype: contains)
+    }
+    COLUMN colYear (Attribute: PeriodYear, Caption: 'Year', Alignment: right, Sortable: true) {
+      numberfilter nfYear (attributes: [Trends.MeterMonthVE.PeriodYear])
+    }
     COLUMN colMonth (Attribute: MonthNo, Caption: 'Month', Alignment: right, Sortable: true)
     COLUMN colKwh (Attribute: TotalKwh, Caption: 'Total kWh', Alignment: right, Sortable: true)
     COLUMN colCount (Attribute: ReadingCount, Caption: 'Readings', Alignment: right, Sortable: true)

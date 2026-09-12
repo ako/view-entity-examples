@@ -107,3 +107,9 @@ Three rules keep them honest and keep them inside the system:
 One is a bright white rectangle in a dark film: the page editor's preview of an
 Atlas page. It was cropped down to the header band to reduce the area, and left
 as it is otherwise. The alternative was to not show the thing the frame is about.
+
+That frame is now paired with the filter's own captured SQL rather than with a
+published-resource call, because the filter it shows turned out to be writable
+in MDL after all — the syntax was in a skill reference, not in `mxcli syntax`.
+So the film follows one page from datasource to `ILIKE` without changing
+subject, and the screenshot is there for what it is: the editor, mid-edit.

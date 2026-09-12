@@ -70,39 +70,49 @@ builds without the database being updated.
 
 ---
 
-## 2. A Data Grid 2 filter cannot be authored
+## 2. The documented Data Grid 2 filter syntax is the gallery one, and is dropped
 
-**Two ways to write one, both dead ends:**
+A Data Grid 2 filter **can** be written from MDL. It goes inside the column's
+own braces, as a widget:
 
-- A per-column `FILTER f { TEXTFILTER tf (Attribute: A) }` block — the form
-  `mxcli syntax page widgets` documents — **parses and is dropped on write**,
-  silently, on the default engine and on `MXCLI_ENGINE=legacy` alike.
-  `DESCRIBE PAGE` afterwards shows the column with no filter.
-- In the grid's filters placeholder (`controlbar`), the widget **is** written,
-  but a Data Grid 2 filter needs `linkedDs` pointing at the grid's datasource,
-  and that property is reported as *"recognized but not yet persisted by
-  mxcli"* (MDL-WIDGET06). The result renders in the browser as a red banner:
+```mdl
+COLUMN colMeter (Attribute: MeterCode, Caption: 'Meter') {
+  textfilter tfMeter (attribute: MeterCode, filtertype: contains)
+}
+```
+
+That persists, and it works: typing `M-004` into it produces
+`WHERE ... "MeterCode" ILIKE ? ESCAPE '\'` with `%M-004%` bound as a parameter
+([`docs/sql/12-grid-filter.sql`](docs/sql/12-grid-filter.sql)).
+
+**The finding is what happens to the other two spellings**, both of which are
+accepted and then lost:
+
+- `mxcli syntax page widgets` documents `COLUMN c (Attribute: A) FILTER f {
+  TEXTFILTER tf (Attribute: A) }`. That is the **GALLERY** form — correct for
+  `gallery g { filter f { textfilter ... } }`, which is how
+  `create-page/reference/widgets.md` shows it. Against a datagrid column it
+  parses, reports no diagnostic, and is **dropped on write**, on the default
+  engine and on `MXCLI_ENGINE=legacy` alike. `DESCRIBE PAGE` afterwards shows
+  the column with no filter, which is the only way to notice.
+- Putting the widget in the grid's filters placeholder (`controlbar`) writes it,
+  but there it needs `linkedDs`, which is reported as *"recognized but not yet
+  persisted by mxcli"* (MDL-WIDGET06). The result renders in the browser as
   **"Unable to get filter store. Check parent widget configuration."**
 
-`placeholder` and `delay` on the same widget are also recognized-but-not-
-persisted.
+So the top-level syntax reference points at the one form that silently does
+nothing, and the form that works is in a skill reference the session never sees
+(§5). Two fixes, either of which would have saved this: make the datagrid
+column reject the gallery `FILTER` block instead of swallowing it, and show the
+column-braces form under `syntax page widgets`.
 
-**Verified.** Both forms executed against this repo's app, then `DESCRIBE PAGE`
-and a Playwright load of the running page. This is why
-`Trends.MeterMonths` has no filter and why
-[`docs/06`](docs/06-view-entities-101.md) shows filter pushdown through the
-published OData resource instead of a typed grid filter.
+**Verified** on 10.24.24.119653: written, `DESCRIBE PAGE`d, built, run, and
+driven with Playwright while `ConnectionBus_Retrieve` was at TRACE.
 
-**What Studio Pro does**, from screenshots of this same page opened in 11.14
-Beta: the grid carries *Show column filter: Yes*, each column header renders a
-**PLACE FILTER WIDGET HERE** drop target, and a Text filter dropped into one
-gets `Filter attributes: Auto`, `Default filter: Contains`, `Apply after
-500 ms` — it takes its datasource from the column it sits in, which is why
-nothing in the editor ever asks for `linkedDs`. So the per-column `FILTER`
-block MDL already parses is the right shape; it is the write that is missing,
-and the placeholder form is a detour that cannot work without the link.
-
----
+**One more thing that is silently ignored**, and this one does warn:
+`numberfilter nf (attributes: [...])` with the default `attrChoice: auto` gets
+MDL-WIDGET10 — *"property `attributes` is hidden when `attrChoice` is 'auto'
+— the value will be ignored"*. It still filters, on the column's own attribute.
 
 ## 3. `DESCRIBE ENTITY` output for a view entity does not round-trip
 

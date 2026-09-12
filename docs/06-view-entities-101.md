@@ -65,6 +65,7 @@ What the grid then does is the point
 | opens the page | `LIMIT ?` |
 | clicks a column header | `ORDER BY "Trends.MeterMonthVE"."TotalKwh" DESC` |
 | clicks next page | `LIMIT ? OFFSET ?` |
+| types in a column filter | `AND "MeterCode" ILIKE ?` |
 
 and the runtime logs, every time:
 
@@ -75,16 +76,47 @@ ConnectionBus_Retrieve: Data table Trends.MeterMonthVE (15 from 216 row(s))
 Fifteen rows reach the browser. The other 201 — and the 6570 readings behind
 them — stay in the database.
 
-Filtering goes the same way. `odata/basics/v1/MeterMonth` publishes the same
-view entity, and a filtered call
+### Filtering, from the grid itself
+
+The Meter column carries a Data Grid 2 text filter, written in
+[`mdl/21-basics-page.mdl`](../mdl/21-basics-page.mdl) as a widget inside the
+column:
+
+```mdl
+COLUMN colMeter (Attribute: MeterCode, Caption: 'Meter', Sortable: true) {
+  textfilter tfMeter (attribute: MeterCode, filtertype: contains)
+}
+```
+
+which is what Studio Pro shows as a widget in the column's filter slot — every
+other column rendering a `PLACE FILTER WIDGET HERE` drop target until one is
+put there:
+
+![a text filter in the Meter column](shots/sp-page-filter-placed.png)
+
+Type `M-004` into it and the typing lands in the SQL
+([`sql/12-grid-filter.sql`](sql/12-grid-filter.sql)):
+
+```sql
+WHERE ? != ?
+  AND "Trends.MeterMonthVE"."MeterCode" ILIKE ? ESCAPE '\'
+  AND ? != ?
+LIMIT ?
+-- Select params 1-6: [6,[0]], #, %M-004%, [1,[]], #, 15
+-- runtime: Data table Trends.MeterMonthVE (15 from 36 row(s))
+```
+
+`Contains` became `ILIKE`, the text became a bound parameter, and 36 of the 216
+rows matched — of which the grid fetched 15. Nothing else in the statement
+changed: the view entity is still the same subquery it was before anyone typed.
+
+The same condition through the published resource looks like this instead
 ([`sql/09-filter-pushdown-101.sql`](sql/09-filter-pushdown-101.sql)):
 
 ```
 GET .../MeterMonth?$filter=meterCode eq 'M-004' and periodYear eq 2025
 200  12 rows
 ```
-
-becomes
 
 ```sql
 WHERE (NOT ... IS NULL) AND ...                       -- 3 not-null guards
@@ -94,30 +126,8 @@ ORDER BY "Trends.MeterMonthVE"."MonthNo" ASC LIMIT ?
 -- Select params 1-3: M-004, 2025, 3000
 ```
 
-### The filter, as Studio Pro authors it
-
-![a text filter in the Meter column](shots/sp-page-filter-placed.png)
-
-A Data Grid 2 filter is a widget **in a column**: the grid carries
-*Show column filter: Yes*, every column header renders a `PLACE FILTER WIDGET
-HERE` drop target, and the filter takes its datasource from the column it sits
-in. Which is why nothing in the editor ever asks for a `linkedDs` — and why the
-per-column `FILTER` block that MDL already parses is the right shape.
-
-![the text filter's settings](shots/sp-text-filter-dialog.png)
-
-### One thing this repo could not build
-
-That filter is in a copy of the page opened in Studio Pro 11.14, not in the
-model this repo builds. A column filter would show the same pushdown from the
-grid itself, and it is not in the committed page because mxcli
-(nightly-20260909) cannot write one: a
-per-column `FILTER` block parses and is dropped on write, and a filter placed
-in the grid's `controlbar` slot needs `linkedDs`, which the same build reports
-as "recognized but not yet persisted" (MDL-WIDGET06). Written without the link,
-the widget renders as *"Unable to get filter store. Check parent widget
-configuration."* So the film shows sorting and paging from the grid, and the
-`WHERE` clause from the published resource.
+`eq` becomes `=`, `contains` becomes `ILIKE`. Same place in the statement, same
+view entity underneath.
 
 ## What the database does with it
 

@@ -130,7 +130,7 @@ requests in [`requests/trends.http`](requests/trends.http).
 
 [`video/`](video) builds a narrated walkthrough of each example:
 
-- **`view-entities-101.mp4`** (5m31s) — what a view entity is, for someone who
+- **`view-entities-101.mp4`** (5m32s) — what a view entity is, for someone who
   has never written a query: table/row/column, the three OQL clauses, the view
   under a data grid, and what the database is asked as you sort, page and
   filter. Ends on the plans and the three errors you meet first. Three frames

@@ -1,0 +1,24 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const LOG = '/home/user/view-entity-examples/app/.mxcli/runtime.log';
+const mark = () => fs.statSync(LOG).size;
+const marks = {};
+(async () => {
+  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1229/chrome-linux64/chrome' });
+  const p = await b.newPage({ viewport: { width: 1400, height: 820 }, deviceScaleFactor: 2 });
+  await p.goto('http://127.0.0.1:8080/', { waitUntil: 'networkidle' });
+  await p.waitForTimeout(4000);
+  console.log('alerts', await p.locator('.alert').count());
+  const inputs = await p.locator('input').all();
+  console.log('inputs', inputs.length);
+  await p.screenshot({ path: 'capture/shots/grid-filters.png' });
+  marks.filter = mark();
+  await inputs[0].click();
+  await inputs[0].type('M-004', { delay: 90 });
+  await p.waitForTimeout(3500);
+  await p.screenshot({ path: 'capture/shots/grid-filtered.png' });
+  marks.end = mark();
+  console.log(await p.locator('.widget-datagrid').first().innerText().then(t => t.split('\n').slice(0,12).join(' | ')).catch(()=>''));
+  fs.writeFileSync('/tmp/fmarks.json', JSON.stringify(marks));
+  await b.close();
+})();
