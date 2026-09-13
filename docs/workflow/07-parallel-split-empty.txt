@@ -1,0 +1,33 @@
+-- A parallel split written from MDL runs its paths as if they were empty.
+--
+-- mxcli nightly-20260909-ca9b90ed, Mendix 11.14.0. The probe is mxcli's own
+-- documented shape (mxcli syntax workflow parallel-split), with one top-level
+-- call microflow as a control:
+
+    create or replace workflow Trends.SplitProbe
+      parameter $Context: Trends.ReadingCheck
+    begin
+      call microflow Trends.ACT_LogOutcome with (Trends.ACT_LogOutcome.Check = '$WorkflowContext');
+      parallel split probeSplit
+        path 1 { call microflow Trends.ACT_NotifyOwner with (Trends.ACT_NotifyOwner.Check = '$WorkflowContext'); }
+        path 2 { call microflow Trends.ACT_Escalate    with (Trends.ACT_Escalate.Check    = '$WorkflowContext'); };
+    end workflow;
+-- mxcli check: passes. mxbuild: 0 errors. describe workflow: round-trips the
+-- paths' contents exactly as written.
+
+-- At runtime, the probe instance's activities (system$workflowactivity):
+
+    Start | Finished
+    ACT_LogOutcome | Finished
+    Parallel split | Finished
+    End of parallel split path | Finished
+    End of parallel split path | Finished
+    Merge of Parallel split | Finished
+    End | Finished
+
+-- The top-level call ran:
+
+    2026-09-13 08:48:16.004 INFO - Trends: Check closed for meter M-004 with status Open
+
+-- The two inside the paths did not, and left no activity record at all:
+-- each path goes straight from the split to its own end. Nothing reports it.

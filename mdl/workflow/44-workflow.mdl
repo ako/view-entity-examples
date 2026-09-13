@@ -1,0 +1,83 @@
+-- Film 5 - the process itself.
+--
+-- Two user tasks, one decision, one boundary timer and two jumps. Each is
+-- something the status-attribute version of this cannot do, and the film takes
+-- them in that order.
+--
+-- The context is always $WorkflowContext. Whatever the parameter is called in
+-- the header, mxcli writes it as WorkflowContext, and Mendix expressions are
+-- case-sensitive from 11.9 on - $workflowContext is an undefined variable and
+-- fails the build with CE0117.
+--
+-- THREE THINGS THAT SHAPE THIS SCRIPT, all of them measured rather than read:
+--
+-- 1. A user task has no "next" activity. Each outcome is its own path and runs
+--    to its own end; anything written after the task at the same level is never
+--    reached, and nothing reports it - not check, not the build, not the
+--    runtime. So everything that happens after a task lives INSIDE an outcome.
+-- 2. A boundary-event path must end with a jump. Mendix wants a jump or an end
+--    activity (CE0105) and MDL cannot write an end activity, so a jump is the
+--    only ending available from here.
+-- 3. A parallel split written from MDL runs both paths EMPTY - see
+--    docs/workflow/07-parallel-split-empty.txt. This process was designed with
+--    one and is sequential because of it.
+
+create or replace workflow Trends.CheckReading
+  parameter $Context: Trends.ReadingCheck
+  display 'Check a flagged reading'
+  description 'A reading that looks wrong goes to a person, and stays with a person until it is settled.'
+begin
+
+  -- The step everything else hangs off. Targeting decides who SEES this task; it
+  -- does not assign it to anybody. The task page's buttons do the claiming.
+  user task Review 'Review the flagged reading'
+    page Trends.TaskReview
+    targeting xpath '[System.UserRoles/System.UserRole/Name = ''Reviewer'']'
+    description 'A reading is far above the days either side of it. Accept it, reject it, or ask for a re-read.'
+    outcomes
+      'Accept' {
+        -- A big correction is not settled by one person.
+        decision decisionBig '$WorkflowContext/Kwh > 50'
+          outcomes
+            true -> {
+              call microflow Trends.ACT_NotifyOwner
+                with (Trends.ACT_NotifyOwner.Check = '$WorkflowContext');
+              user task Countersign 'Countersign a large correction'
+                page Trends.TaskReview
+                targeting xpath '[System.UserRoles/System.UserRole/Name = ''Supervisor'']'
+                description 'A reviewer accepted a reading far above its neighbours. Confirm it, or send it back.'
+                outcomes
+                  'Accept' {
+                    call microflow Trends.ACT_LogOutcome
+                      with (Trends.ACT_LogOutcome.Check = '$WorkflowContext');
+                  }
+                  'Reject' {
+                    call microflow Trends.ACT_LogOutcome
+                      with (Trends.ACT_LogOutcome.Check = '$WorkflowContext');
+                  }
+                  'Ask for a re-read' { jump to Review; };
+            }
+            false -> {
+              call microflow Trends.ACT_LogOutcome
+                with (Trends.ACT_LogOutcome.Check = '$WorkflowContext');
+            };
+      }
+      'Reject' {
+        call microflow Trends.ACT_LogOutcome
+          with (Trends.ACT_LogOutcome.Check = '$WorkflowContext');
+      }
+      'Ask for a re-read' {
+        -- The meter is read again out in the field. The workflow waits, and then
+        -- puts the same question back in front of the same reviewers.
+        wait for timer timerReread 'addDays([%CurrentDateTime%], 1)';
+        jump to Review;
+      }
+    boundary event interrupting timer 'addDays([%CurrentDateTime%], 3)' {
+      -- Three days with no answer. Nobody is logged in when this fires: the
+      -- check is marked escalated, and the question goes back up.
+      call microflow Trends.ACT_Escalate
+        with (Trends.ACT_Escalate.Check = '$WorkflowContext');
+      jump to Review;
+    };
+
+end workflow;

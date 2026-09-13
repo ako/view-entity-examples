@@ -1,0 +1,42 @@
+-- Film 5 - security, because a process without users is not a process.
+--
+-- This is the one thing the workflow app needs that the view-entity app does
+-- not. `app/ViewEntityExamples.mpr` runs with security OFF, which is why every
+-- OData request in this repo works without credentials. Half of this film is
+-- about who can see a task and who has claimed it, and none of that is
+-- demonstrable without somebody to log in as. Hence a second app.
+--
+-- Level is PROTOTYPE: login, page access and microflow access are enforced,
+-- entity access rules are not. That is enough for the film and keeps the script
+-- about workflows rather than about access rules.
+
+create module role Trends.Reviewer   description 'Reviews flagged readings';
+create module role Trends.Supervisor description 'Countersigns large corrections and picks up escalations';
+
+grant Trends.Reviewer   on Trends.ReadingCheck (create, delete, read *, write *);
+grant Trends.Supervisor on Trends.ReadingCheck (create, delete, read *, write *);
+grant Trends.Reviewer   on Trends.Reading (read *);
+grant Trends.Supervisor on Trends.Reading (read *);
+grant Trends.Reviewer   on Trends.Meter (read *);
+grant Trends.Supervisor on Trends.Meter (read *);
+
+grant view on page Trends.Inbox      to Trends.Reviewer, Trends.Supervisor;
+grant view on page Trends.TaskReview to Trends.Reviewer, Trends.Supervisor;
+grant view on page Trends.Checks     to Trends.Reviewer, Trends.Supervisor;
+
+grant execute on microflow Trends.DS_CheckForTask to Trends.Reviewer, Trends.Supervisor;
+grant execute on microflow Trends.ACT_Accept      to Trends.Reviewer, Trends.Supervisor;
+grant execute on microflow Trends.ACT_Reject      to Trends.Reviewer, Trends.Supervisor;
+grant execute on microflow Trends.ACT_AskReread   to Trends.Reviewer, Trends.Supervisor;
+
+-- The XPath the user tasks target on is a user ROLE name, so these two names are
+-- load-bearing: change one here and the task silently reaches nobody.
+create user role Reviewer   (Trends.Reviewer,   System.User, Administration.User);
+create user role Supervisor (Trends.Supervisor, System.User, Administration.User);
+
+alter project security level prototype;
+alter project security demo users on;
+
+-- The password policy in a fresh app is 12 characters, mixed case and a digit.
+create demo user 'reviewer'   password 'ReviewThis123' (Reviewer);
+create demo user 'supervisor' password 'SuperviseIt123' (Supervisor);

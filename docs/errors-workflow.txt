@@ -1,0 +1,137 @@
+Building the workflow example: everything that went wrong, and what it printed.
+Mendix 11.14.0, mxcli nightly-20260909-ca9b90ed. In the order it happened.
+
+
+1. THE USER-ROLE ASSOCIATION IS NOT CALLED WHAT THE SKILL SAYS
+
+   targeting xpath '[System.User_UserRoles/System.UserRole/Name = ''Reviewer'']'
+
+   [CE1613] The selected association 'System.User_UserRoles' no longer exists.
+     - at Trends / Workflow 'CheckReading' / Property 'XPath constraint' of user
+       task 'Review the flagged reading'
+
+   The system-module skill's association table names it User_UserRoles. In XPath
+   it is System.UserRoles. Three tasks carried the same constraint, so one wrong
+   name was three build errors.
+
+
+2. A TEXT BOX WILL NOT SHOW A DATETIME
+
+   textbox txtReadAt (label: 'Read at', attribute: ReadAt)
+
+   [CE2421] Only attributes of type Hashed string, Integer, Long, String,
+   Decimal, AutoNumber are allowed here. — at Trends / Page 'TaskReview' /
+   Property 'Value' of text box [ReadAt]
+
+   datepicker, not textbox.
+
+
+3. AN XPATH CONSTRAINT IS NOT AN EXPRESSION
+
+   retrieve $Previous from Trends.Reading
+     where ReadAt = addDays($Reading/ReadAt, -1) limit 1;
+
+   [CE0161] Error(s) in XPath constraint. — at Trends / Microflow
+   'ASu_FlagOutlier' / Retrieve object(s) activity
+
+   A constraint can compare against a variable but cannot call addDays(). Work
+   the value out first and compare to that.
+
+   The same retrieve, constrained on a date alone, also found the right day on
+   the WRONG METER - which nothing reports, because it is a correct query. It
+   showed up as a neighbouring reading of 17 against a real neighbour of 23.
+
+
+4. WITHOUT `limit 1` A RETRIEVE IS A LIST
+
+   Seven CE0117s in one microflow, all of them downstream of one retrieve that
+   was a list where the script read it as an object. The activity's own name in
+   the error is the tell: "Retrieve LIST OF Reading from database".
+
+
+5. count() IS NOT A MENDIX EXPRESSION FUNCTION
+
+   if count($ExistingChecks) > 0 then
+
+   ✗ if condition calls 'count()', which is not a Mendix expression function —
+     the build fails CE0117 "Error(s) in expression" [MDL044]
+
+   Caught by mxcli check before the build. Aggregate into a variable first.
+
+
+6. AN OBJECT IS NEVER MADE BY ASSIGNMENT
+
+   $Meter = $Reading/Trends.Reading_Meter;
+
+   - variable 'Meter' is not declared            [MDL043]
+
+   Objects come from a parameter, a retrieve, a create, or a loop iterator.
+   Dereference where you use it instead.
+
+
+7. A MICROFLOW DATA SOURCE NEEDS ITS ARGUMENT
+
+   dataview dvCheck (datasource: microflow Trends.DS_CheckForTask)
+
+   - widget 'dvCheck': microflow data source Trends.DS_CheckForTask has no
+     argument for parameter 'Task' — Mendix rejects this with CE1571
+
+   The widgets reference says "no (), the name alone". That is true only for a
+   microflow with no parameters.
+
+
+8. NOTHING MAY END A BOUNDARY PATH EXCEPT A JUMP
+
+   [CE0105] User task cannot be the last object of a flow, it should end with a
+   jump or end activity. — at Trends / Workflow 'CheckReading' / User task
+   'Nobody reviewed this in time'
+
+   ...and, after putting a microflow call after the user task:
+
+   [CE0105] Call microflow cannot be the last object of a flow, it should end
+   with a jump or end activity. — at Trends / Workflow 'CheckReading' / Call
+   microflow 'ACT_LogOutcome'
+
+   MDL has no end-activity statement, so a jump is the only ending available.
+   mxcli's own documented boundary-event example (mxcli syntax workflow
+   boundary-event) ends with a call microflow and does not build.
+
+
+9. ONE OUTCOME WITH A BODY IS REFUSED
+
+   user task Countersign ... outcomes 'Agree' { call microflow ...; };
+
+   ✗ user task 'Countersign' has a single outcome with nested activities —
+     MxBuild rejects this (CE1876)                [MDL-WF02]
+
+
+10. THE TWO THAT NOTHING REPORTS AT ALL
+
+    Both pass mxcli check, pass mxbuild, and round-trip through
+    `describe workflow` exactly as written. Neither does anything at runtime.
+
+    a) Activities written after a user task at the same level are unreachable.
+       A user task has no "next": each outcome is its own path and runs to its
+       own end. The instance simply completes, with no error anywhere.
+
+    b) A parallel split runs both paths EMPTY. See
+       docs/workflow/07-parallel-split-empty.txt for the probe and the activity
+       records. mxcli writes the split and its path ends; whatever is inside
+       `path N { ... }` does not reach the executable model.
+
+
+11. AND ONE THE PLATFORM DOES NOT REPORT, BUT mxcli DOES
+
+    set task outcome $Task 'Accept';     -- without claiming it first
+
+    ⚠ microflow Trends.ACT_AcceptNoClaim: completes user task $Task without
+      assigning it first ... fails at RUNTIME ("You can't complete this user
+      task, it is not assigned to you") with the button appearing to do
+      nothing.                                    [MDL-WORKFLOW10]
+
+    Ignored on purpose, to see it fail:
+
+    2026-09-13 08:40:54.153 ERROR - Client: You can't complete this user task,
+    it is not assigned to you.
+
+    The screen does not change. There is nothing else anywhere.

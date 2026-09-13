@@ -1,0 +1,51 @@
+-- Film 5 - starting an instance, and getting to the screens.
+--
+-- Instances do not start themselves. A microflow calls the workflow with the
+-- object it is about and returns immediately - that is the last the microflow
+-- sees of it. The instance it started outlives the request, and the association
+-- written here is how the task page finds its way back to the object.
+
+create or modify microflow Trends.ACT_StartCheck (
+  $Check: Trends.ReadingCheck
+)
+begin
+  $Wf = call workflow Trends.CheckReading(WorkflowContext = $Check);
+  change $Check (Trends.ReadingCheck_Workflow = $Wf);
+  commit $Check;
+  log info node 'Trends' 'Started a review for meter ' + $Check/MeterCode;
+end;
+
+create or modify microflow Trends.ASu_StartChecks ()
+  returns Boolean as $Done
+begin
+  -- `= empty` works on attributes, not associations: the absence of an
+  -- associated object is negation (MDL047 / CE0161).
+  retrieve $Checks from Trends.ReadingCheck
+    where [not(Trends.ReadingCheck_Workflow/System.Workflow)];
+  loop $Check in $Checks begin
+    call microflow Trends.ACT_StartCheck(Check = $Check);
+  end loop;
+  return true;
+end;
+
+-- One after-startup microflow, which must return TRUE: a false makes the runtime
+-- treat startup as failed and the app never comes up.
+create or modify microflow Trends.ASu_Startup ()
+  returns Boolean as $Started
+begin
+  $Data    = call microflow Trends.ASu_CreateTrendData();
+  $Flagged = call microflow Trends.ASu_FlagOutlier();
+  $Running = call microflow Trends.ASu_StartChecks();
+  return true;
+end;
+
+alter settings model AfterStartupMicroflow = 'Trends.ASu_Startup';
+
+create or replace navigation Responsive
+  HOME PAGE MyFirstModule.Home_Web
+  HOME PAGE Trends.Inbox FOR Reviewer
+  HOME PAGE Trends.Inbox FOR Supervisor
+  MENU (
+    MENU ITEM 'My tasks'         PAGE Trends.Inbox  ICON Atlas_Core.Atlas."notes-checklist";
+    MENU ITEM 'Flagged readings' PAGE Trends.Checks ICON Atlas_Core.Atlas."flag";
+  );

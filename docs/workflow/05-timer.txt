@@ -1,0 +1,27 @@
+-- The boundary timer, firing on its own.
+--
+-- Filmed at 60 seconds rather than the three days the shipped script uses
+-- (mdl/workflow/44-workflow.mdl); nothing else was changed. No browser was
+-- open and nobody was logged in between these two lines.
+
+    boundary event interrupting timer 'addSeconds([%CurrentDateTime%], 60)' {
+      call microflow Trends.ACT_Escalate with (...);
+      jump to Review;
+    };
+
+-- system$workflowactivity:
+
+    08:53:44 | Start                            | Finished
+    08:53:44 | Review the flagged reading       | Aborted
+    08:53:45 | (boundary timer)                 | Finished
+    08:54:45 | ACT_Escalate                     | Finished
+    08:54:45 | Review                           | Finished
+    08:54:45 | Review the flagged reading       | Suspended
+    08:54:45 | (boundary timer)                 | Suspended
+
+-- The task that was waiting is Aborted - that is what INTERRUPTING means.
+-- ACT_Escalate ran, the jump put the question back, and a new Review task is
+-- Suspended with its own three-day timer already running.
+
+    2026-09-13 08:53:44.656 INFO - Trends: Started a review for meter M-004
+    2026-09-13 08:54:45.518 INFO - Trends: Reading check escalated for meter M-004

@@ -1,0 +1,106 @@
+-- Film 5 - the logic around the process.
+--
+-- Nothing here is workflow-specific except the last three, which complete a user
+-- task. They are here rather than in the workflow because that is where Mendix
+-- puts them: a workflow's outcome branches can be empty, and the work is done by
+-- the microflow the task page's button calls.
+
+-- 6 meters x 1095 daily readings, with one reading deliberately three times its
+-- neighbours. That reading is what the film opens on, and the whole process
+-- exists because no query can decide whether it is a fault or a cold week.
+create or modify microflow Trends.ASu_CreateTrendData ()
+  returns Boolean as $Done
+begin
+  retrieve $ExistingMeters from Trends.Meter;
+  $MeterCount = count($ExistingMeters);
+  if $MeterCount = 0 then
+    declare $Start DateTime = addYears([%BeginOfCurrentYear%], -3);
+    declare $M Integer = 1;
+    while $M <= 6 begin
+      $Meter = create Trends.Meter (
+        MeterCode = 'M-' + formatDecimal($M, '000'),
+        Region = 'Region ' + toString($M)
+      ) commit;
+
+      $Readings = create list of Trends.Reading;
+      declare $D Integer = 0;
+      while $D < 1095 begin
+        $Reading = create Trends.Reading (
+          ReadAt = addDays($Start, $D),
+          Kwh = if $M = 4 and $D = 800 then 62 else 8 + ($D mod 11) + ($M * 2),
+          Trends.Reading_Meter = $Meter
+        );
+        add $Reading to $Readings;
+        $D = $D + 1;
+      end while;
+      commit $Readings;
+
+      $M = $M + 1;
+    end while;
+    log info node 'Trends' 'Trend demo data created: 6 meters, 6570 readings, 1 outlier';
+  end if;
+  return true;
+end;
+
+-- The monitoring that raises the question. In a real app this is a scheduled
+-- event over yesterday's readings; here it is one pass that finds the outlier
+-- and writes a ReadingCheck for it. Everything the reviewer needs is copied onto
+-- the check, so the screen does not depend on reading another module's data.
+create or modify microflow Trends.ASu_FlagOutlier ()
+  returns Boolean as $Done
+begin
+  retrieve $ExistingChecks from Trends.ReadingCheck;
+  $CheckCount = count($ExistingChecks);
+  if $CheckCount > 0 then
+    return true;
+  end if;
+
+  -- LIMIT 1 is what makes this an object rather than a list; without it every
+  -- later $Reading/... is a member access on a list and the build fails CE0117.
+  retrieve $Reading from Trends.Reading
+    where Kwh > 50 limit 1;
+
+  if $Reading = empty then
+    log warning node 'Trends' 'No outlier reading found - nothing to review';
+    return true;
+  end if;
+
+  -- An XPath constraint is not a Mendix expression: it can compare against a
+  -- variable, but it cannot call addDays(). Work the date out first (CE0161).
+  declare $PrevDay DateTime = addDays($Reading/ReadAt, -1);
+  retrieve $Previous from Trends.Reading
+    where [ReadAt = $PrevDay and Trends.Reading_Meter = $Reading/Trends.Reading_Meter]
+    limit 1;
+
+  -- An object is never made by plain assignment in MDL (MDL043), so the meter is
+  -- dereferenced where it is used rather than held in a variable.
+  $Check = create Trends.ReadingCheck (
+    MeterCode                    = $Reading/Trends.Reading_Meter/MeterCode,
+    Region                       = $Reading/Trends.Reading_Meter/Region,
+    ReadAt                       = $Reading/ReadAt,
+    Kwh                          = $Reading/Kwh,
+    NeighbourKwh                 = if $Previous = empty then 0 else $Previous/Kwh,
+    Status                       = Trends.ENUM_CheckStatus.Open,
+    RaisedOn                     = [%CurrentDateTime%],
+    Note                         = 'Reading is far above the days either side of it.',
+    Trends.ReadingCheck_Reading  = $Reading
+  ) commit;
+
+  log info node 'Trends' 'Flagged reading on meter ' + $Reading/Trends.Reading_Meter/MeterCode
+      + ' for review: ' + toString($Reading/Kwh) + ' kWh';
+  return true;
+end;
+
+-- The task page's data source. A microflow rather than an XPath data source
+-- because microflows bypass entity access: every role can then see the object
+-- its own task is about, without widening access to a System entity.
+create or modify microflow Trends.DS_CheckForTask (
+  $Task: System.WorkflowUserTask
+)
+  returns Trends.ReadingCheck as $Check
+begin
+  retrieve $Check from Trends.ReadingCheck
+    where Trends.ReadingCheck_Workflow = $Task/System.WorkflowUserTask_Workflow
+    limit 1;
+  return $Check;
+end;

@@ -1,0 +1,20 @@
+-- Where the instance actually is. Two rows, written by the engine.
+-- Captured from the running app with the admin API's OQL endpoint:
+--   mxcli oql --port 8201 -p WorkflowExample.mpr "..."
+
+select w.ID as Instance, d.Name as Definition, w.State as State, w.StartTime as StartedAt
+from   System.Workflow as w
+  inner join w/System.Workflow_WorkflowDefinition/System.WorkflowDefinition as d
+
+| Instance          | State      | Definition          | StartedAt                    |
+|-------------------|------------|---------------------|------------------------------|
+| 13510798882111622 | InProgress | Trends.CheckReading | Sun Sep 13 08:35:22 UTC 2026 |
+(1 rows)
+
+select t.ID as Task, t.Name as Name, t.State as State, t.StartTime as WaitingSince
+from   System.WorkflowUserTask as t
+
+| Task              | State      | WaitingSince                 | Name                       |
+|-------------------|------------|------------------------------|----------------------------|
+| 14918173765664919 | InProgress | Sun Sep 13 08:35:23 UTC 2026 | Review the flagged reading |
+(1 rows)

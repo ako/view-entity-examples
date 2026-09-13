@@ -1,0 +1,16 @@
+-- The restart proof. Nothing was done to the database between these two
+-- queries; the app was stopped and started, and the process is on the step
+-- it was on, with the same task open. Same ids as 02-instance.txt.
+
+2026-09-13 08:36:10.204 INFO - Core: Mendix Runtime is now shut down.
+2026-09-13 08:36:57.800 INFO - Core: Mendix Runtime successfully started, the application is now available.
+
+| Instance          | State      | StartedAt                    |
+|-------------------|------------|------------------------------|
+| 13510798882111622 | InProgress | Sun Sep 13 08:35:22 UTC 2026 |
+(1 rows)
+
+| Task              | State      | Name                       |
+|-------------------|------------|----------------------------|
+| 14918173765664919 | InProgress | Review the flagged reading |
+(1 rows)

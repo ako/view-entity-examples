@@ -1,0 +1,20 @@
+-- One instance, start to finish. Nobody touched the database; two people
+-- clicked four buttons between them, minutes apart, and the engine kept the
+-- place in between.
+
+-- system$workflowactivity, in the order it happened:
+
+    08:51:24 | Start                            | Finished  | 
+    08:51:24 | Review the flagged reading       | Finished  | Accept
+    08:51:24 | (boundary timer)                 | Aborted   | 
+    08:51:38 | Decision                         | Finished  | true
+    08:51:38 | ACT_NotifyOwner                  | Finished  | <void>
+    08:51:38 | Countersign a large correction   | Finished  | Accept
+    08:52:22 | ACT_LogOutcome                   | Finished  | <void>
+    08:52:22 | End                              | Finished  | 
+
+-- and what the microflows on those paths logged:
+
+    2026-09-13 08:51:24.531 INFO - Trends: Started a review for meter M-004
+    2026-09-13 08:51:38.079 INFO - Trends: Notified the owner of meter M-004 about the reading of 3/11/25, 12:00 AM
+    2026-09-13 08:52:22.140 INFO - Trends: Check closed for meter M-004 with status Accepted

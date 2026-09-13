@@ -1,0 +1,95 @@
+-- Film 5 - what the task page's three buttons do.
+--
+-- This is the shape Mendix expects: the workflow's outcome branches stay empty,
+-- and a microflow does the domain work and then completes the task with the name
+-- of the branch to take.
+--
+-- The order of the three statements matters. `set task outcome` on a task nobody
+-- has claimed fails at runtime, and it fails quietly - the button appears to do
+-- nothing and the only trace is a line in the runtime log. Targeting decides who
+-- may SEE a task; claiming it is a plain write to Assignees, and it has to come
+-- first.
+--
+-- Who decided is not written onto the check: Mendix already records it, as a
+-- System.WorkflowUserTaskOutcome row naming the user and the outcome. There is no
+-- expression for the current user's name anyway - [%CurrentUser%] is an object
+-- token, and dereferencing it (`[%CurrentUser%]/Name`) does not parse.
+
+create or modify microflow Trends.ACT_Accept (
+  $Task: System.WorkflowUserTask,
+  $Check: Trends.ReadingCheck
+)
+begin
+  change $Check (
+    Status    = Trends.ENUM_CheckStatus.Accepted,
+    DecidedOn = [%CurrentDateTime%]
+  );
+  commit $Check;
+
+  change $Task (System.WorkflowUserTask_Assignees = [%CurrentUser%]);
+  commit $Task;
+  set task outcome $Task 'Accept';
+end;
+
+create or modify microflow Trends.ACT_Reject (
+  $Task: System.WorkflowUserTask,
+  $Check: Trends.ReadingCheck
+)
+begin
+  change $Check (
+    Status    = Trends.ENUM_CheckStatus.Rejected,
+    DecidedOn = [%CurrentDateTime%]
+  );
+  commit $Check;
+
+  change $Task (System.WorkflowUserTask_Assignees = [%CurrentUser%]);
+  commit $Task;
+  set task outcome $Task 'Reject';
+end;
+
+create or modify microflow Trends.ACT_AskReread (
+  $Task: System.WorkflowUserTask,
+  $Check: Trends.ReadingCheck
+)
+begin
+  change $Check (
+    Status    = Trends.ENUM_CheckStatus.ReReadRequested,
+    DecidedOn = [%CurrentDateTime%]
+  );
+  commit $Check;
+
+  change $Task (System.WorkflowUserTask_Assignees = [%CurrentUser%]);
+  commit $Task;
+  set task outcome $Task 'Ask for a re-read';
+end;
+
+-- Called by the workflow itself, not by a button: the boundary timer's path, and
+-- the branch a large reading takes. It only records; the escalated task is
+-- created by the workflow's next user task activity.
+create or modify microflow Trends.ACT_Escalate (
+  $Check: Trends.ReadingCheck
+)
+begin
+  change $Check (Status = Trends.ENUM_CheckStatus.Escalated);
+  commit $Check;
+  log info node 'Trends' 'Reading check escalated for meter ' + $Check/MeterCode;
+end;
+
+-- The two the workflow calls after a decision has been made. Neither does
+-- anything a microflow could not do on its own; they are here because the
+-- workflow needs something to put on its branches.
+create or modify microflow Trends.ACT_NotifyOwner (
+  $Check: Trends.ReadingCheck
+)
+begin
+  log info node 'Trends' 'Notified the owner of meter ' + $Check/MeterCode
+      + ' about the reading of ' + toString($Check/ReadAt);
+end;
+
+create or modify microflow Trends.ACT_LogOutcome (
+  $Check: Trends.ReadingCheck
+)
+begin
+  log info node 'Trends' 'Check closed for meter ' + $Check/MeterCode
+      + ' with status ' + toString($Check/Status);
+end;

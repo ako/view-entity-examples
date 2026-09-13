@@ -1,0 +1,24 @@
+-- The quiet failure, and the two places it shows up.
+--
+-- A microflow that completes a user task nobody has claimed:
+
+    create or modify microflow Trends.ACT_AcceptNoClaim (
+      $Task: System.WorkflowUserTask, $Check: Trends.ReadingCheck )
+    begin
+      set task outcome $Task 'Accept';
+    end;
+
+-- 1. mxcli check, before the build:
+
+    ⚠ microflow Trends.ACT_AcceptNoClaim: completes user task $Task without
+      assigning it first — a user task that is not assigned to the current user
+      cannot be completed, and this fails at RUNTIME ("You can't complete this
+      user task, it is not assigned to you") with the button appearing to do
+      nothing. Neither mxcli check nor mx check catches it. [MDL-WORKFLOW10]
+
+-- 2. mx check and the build: nothing. 0 errors, 0 warnings.
+
+-- 3. The runtime, after clicking the button. The screen does not change.
+
+    2026-09-13 08:40:54.153 ERROR - Client: You can’t complete this user task, it is not assigned to you.
+    Error: You can’t complete this user task, it is not assigned to you.

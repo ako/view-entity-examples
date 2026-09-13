@@ -1,0 +1,96 @@
+-- Film 5 - the two screens the process needs.
+--
+-- TaskReview is the page a user task renders. Its parameter is
+-- System.WorkflowUserTask - that is the platform's own entity for "a step
+-- somebody has to do", and every workflow in every Mendix app uses it.
+--
+-- The object the task is ABOUT is found by a microflow data source rather than an
+-- XPath one. Microflows bypass entity access, so every role sees the check its own
+-- task is about without the module having to widen access to a System entity -
+-- which, per the manage-security skill, it cannot do anyway.
+
+create or replace page Trends.TaskReview
+(
+  params: { $Task: System.WorkflowUserTask },
+  title: 'Review a flagged reading',
+  layout: MyFirstModule.App_Default
+)
+{
+  layoutgrid lgReview {
+    row rowReview {
+      column colReview (desktopwidth: autofill) {
+  dataview dvCheck (datasource: microflow Trends.DS_CheckForTask(Task: $Task)) {
+    textbox txtMeter    (label: 'Meter',     attribute: MeterCode,    editable: never)
+    textbox txtRegion   (label: 'Region',    attribute: Region,       editable: never)
+    datepicker dtReadAt (label: 'Read at',   attribute: ReadAt,       editable: never)
+    textbox txtKwh      (label: 'Reading',   attribute: Kwh,          editable: never)
+    textbox txtNeighbour(label: 'Day before',attribute: NeighbourKwh, editable: never)
+    textarea txtNote    (label: 'Why it was flagged', attribute: Note, editable: never)
+
+    footer ftrActions {
+      actionbutton btnAccept (
+        caption: 'Accept',
+        action: microflow Trends.ACT_Accept(Task: $Task, Check: $currentObject),
+        buttonstyle: success
+      )
+      actionbutton btnReject (
+        caption: 'Reject',
+        action: microflow Trends.ACT_Reject(Task: $Task, Check: $currentObject),
+        buttonstyle: danger
+      )
+      actionbutton btnReread (
+        caption: 'Ask for a re-read',
+        action: microflow Trends.ACT_AskReread(Task: $Task, Check: $currentObject)
+      )
+    }
+  }
+      }
+    }
+  }
+}
+
+-- The inbox. A plain grid over the open user tasks, which is all a task inbox is.
+create or replace page Trends.Inbox
+(
+  title: 'My tasks',
+  layout: MyFirstModule.App_Default,
+  url: 'inbox'
+)
+{
+  datagrid dgTasks (
+    datasource: database from System.WorkflowUserTask where [EndTime = empty],
+    PageSize: 10
+  ) {
+    column colName  (attribute: Name,      caption: 'Task')
+    column colStart (attribute: StartTime, caption: 'Waiting since')
+    column colDue   (attribute: DueDate,   caption: 'Due')
+    column colOpen  (caption: 'Action', ShowContentAs: customContent) {
+      actionbutton btnOpen (
+        caption: 'Open',
+        action: show_page Trends.TaskReview(Task: $currentObject),
+        buttonstyle: primary
+      )
+    }
+  }
+}
+
+-- Everything the process has ever looked at, whatever state it reached.
+create or replace page Trends.Checks
+(
+  title: 'Flagged readings',
+  layout: MyFirstModule.App_Default,
+  url: 'checks'
+)
+{
+  datagrid dgChecks (
+    datasource: database from Trends.ReadingCheck,
+    PageSize: 10
+  ) {
+    column colMeter  (attribute: MeterCode,    caption: 'Meter')
+    column colReadAt (attribute: ReadAt,       caption: 'Read at')
+    column colKwh    (attribute: Kwh,          caption: 'Reading')
+    column colPrev   (attribute: NeighbourKwh, caption: 'Day before')
+    column colStatus (attribute: Status,       caption: 'Status')
+    column colOn     (attribute: DecidedOn,    caption: 'Decided')
+  }
+}

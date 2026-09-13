@@ -1,0 +1,71 @@
+-- Film 5 - the domain the review process runs on.
+--
+-- Runs against app-workflow/WorkflowExample.mpr (Mendix 11.14.0), NOT against
+-- app/ViewEntityExamples.mpr. The meters and readings are the same shape as the
+-- ones in the other app, so the film can open on data the earlier films used.
+--
+-- ReadingCheck is the workflow's CONTEXT ENTITY: one instance of the workflow is
+-- about one of these. It has to be persistent - the instance outlives the
+-- request that started it.
+--
+-- Everything the reviewer needs to see is copied onto the check itself
+-- (MeterCode, Region, ReadAt, Kwh). That is deliberate: per the manage-security
+-- skill, no project module can widen access to System entities, so a screen
+-- built on data this module owns is one every role can actually read.
+
+create module Trends;
+
+create enumeration Trends.ENUM_CheckStatus (
+  Open            'Waiting for review',
+  Accepted        'Accepted',
+  Rejected        'Rejected',
+  ReReadRequested 'Re-read requested',
+  Escalated       'Escalated to a supervisor'
+);
+
+@position(100, 100)
+create persistent entity Trends.Meter (
+  MeterCode: String(20),
+  Region: String(40)
+)
+index (MeterCode);
+
+@position(450, 100)
+create persistent entity Trends.Reading (
+  ReadAt: DateTime,
+  Kwh: Decimal
+);
+
+create association Trends.Reading_Meter
+  from Trends.Reading to Trends.Meter
+  type Reference
+  owner Default
+  delete_behavior CASCADE;
+
+create index IdxReadingReadAt on Trends.Reading (ReadAt);
+
+@position(850, 100)
+create persistent entity Trends.ReadingCheck (
+  MeterCode:     String(20),
+  Region:        String(40),
+  ReadAt:        DateTime,
+  Kwh:           Decimal,
+  NeighbourKwh:  Decimal,
+  Status:        Trends.ENUM_CheckStatus,
+  RaisedOn:      DateTime,
+  Note:          String(200),
+  DecidedOn:     DateTime
+);
+
+create association Trends.ReadingCheck_Reading
+  from Trends.ReadingCheck to Trends.Reading
+  type Reference
+  owner Default;
+
+-- The link back to the running instance. Mendix does not create this for you:
+-- the context entity carries its own reference to System.Workflow, and it is
+-- what a task page uses to find the object the task is about.
+create association Trends.ReadingCheck_Workflow
+  from Trends.ReadingCheck to System.Workflow
+  type Reference
+  owner Default;

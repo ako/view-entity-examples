@@ -1,0 +1,16 @@
+-- The reading the whole process exists for: M-004's daily readings either side
+-- of it. Nothing in the data says which it is:
+-- a broken meter, or a cold week.
+--
+-- mxcli oql --port 8201 -p WorkflowExample.mpr
+
+| ReadAt                       | Kwh |
+|------------------------------|-----|
+| Sat Mar 08 00:00:00 UTC 2025 | 21  |
+| Sun Mar 09 00:00:00 UTC 2025 | 22  |
+| Mon Mar 10 00:00:00 UTC 2025 | 23  |
+| Tue Mar 11 00:00:00 UTC 2025 | 62  |
+| Wed Mar 12 00:00:00 UTC 2025 | 25  |
+| Thu Mar 13 00:00:00 UTC 2025 | 26  |
+| Fri Mar 14 00:00:00 UTC 2025 | 16  |
+(7 rows)

@@ -1,0 +1,68 @@
+-- Workflow: Trends.CheckReading
+
+create workflow Trends.CheckReading
+  parameter $WorkflowContext: Trends.ReadingCheck
+  display 'Check a flagged reading'
+  description 'A reading that looks wrong goes to a person, and stays with a person until it is settled.'
+  export level Hidden
+
+begin
+  user task Review 'Review the flagged reading'
+    page Trends.TaskReview
+    targeting users xpath '[System.UserRoles/System.UserRole/Name = ''Reviewer'']'
+    description 'A reading is far above the days either side of it. Accept it, reject it, or ask for a re-read.'
+    outcomes
+      'Accept' { }
+      'Reject' { }
+      'Ask for a re-read' {
+        wait for timer timerReread 'addDays([%CurrentDateTime%], 1)' comment 'Wait for timer';
+
+        jump to Review;
+
+      }
+    boundary event interrupting timer 'addDays([%CurrentDateTime%], 3)'
+    {
+      call microflow Trends.ACT_Escalate with (Check = '$WorkflowContext') -- ACT_Escalate
+        outcomes
+          DEFAULT -> { };
+
+      user task Supervise 'Nobody reviewed this in time'
+        page Trends.TaskReview
+        targeting users xpath '[System.UserRoles/System.UserRole/Name = ''Supervisor'']'
+        outcomes
+          'Accept' { }
+          'Reject' { };
+
+      jump to decisionBig;
+
+    };
+
+  decision decisionBig '$WorkflowContext/Kwh > 50' -- Decision
+    outcomes
+      true -> {
+        parallel split splitSecondLook -- Parallel split
+          path 1 {
+            user task Countersign 'Countersign a large correction'
+              page Trends.TaskReview
+              targeting users xpath '[System.UserRoles/System.UserRole/Name = ''Supervisor'']'
+              outcomes
+                'Agree' { };
+
+          }
+          path 2 {
+            call microflow Trends.ACT_NotifyOwner with (Check = '$WorkflowContext') -- ACT_NotifyOwner
+              outcomes
+                DEFAULT -> { };
+
+          };
+
+      }
+      false -> {
+        call microflow Trends.ACT_LogOutcome with (Check = '$WorkflowContext') -- ACT_LogOutcome
+          outcomes
+            DEFAULT -> { };
+
+      };
+
+end workflow
+/
