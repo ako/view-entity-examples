@@ -278,3 +278,29 @@ and the inbox is the better half of that pair for a beginner — it shows the ta
 in somebody's list, which is what "decides who the task shows up for" means. A
 frame budget is a real constraint and a good screenshot is not a reason to
 spend it.
+
+
+## Films 1-4, re-assembled
+
+All four now carry the two audio fixes and, where it applies, the un-stretched
+`.shot`. Nothing was re-written: same narration, same anchors, same lengths.
+
+| | before | after | what changed |
+|---|---|---|---|
+| `odata-key` | 339.6s | 339.6s | bed |
+| `union-grains` | 235.1s | 235.1s | bed |
+| `view-entities-101` | 331.67s | 331.68s | bed, and three un-stretched shots |
+| `shaping-composing` | 321.1s | 321.1s | bed |
+
+Only film 3 needed re-recording, and the reason is worth writing down: the
+picture is rendered at **record** time, so a CSS fix does not reach a film by
+re-assembling it. The bed is mixed at **assemble** time, so that one does. Three
+of the four decks have no `.shot` at all, which is why they only needed the
+cheap half.
+
+A tail measured in each: -91.0 dB, digital silence, in all four.
+
+Film 3's shots are the visible half of the fix. `oql-editor.png` is 1840x770 and
+was being drawn at 1728x452 — squashed by a factor of 1.6 horizontally. It now
+draws at 1080x452, its own proportions, and the editor's type looks like type
+again.
