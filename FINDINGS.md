@@ -245,7 +245,86 @@ carries.
 
 ---
 
-## 6. Smaller things
+## 6. A parallel split written from MDL runs both paths empty
+
+*Mendix 11.14.0, mxcli nightly-20260909-ca9b90ed, in `app-workflow/`.*
+
+**What it is.** `PARALLEL SPLIT ... PATH 1 { ... } PATH 2 { ... }` is written to
+the model with the split, its two path ends and its merge — but not with
+anything that is inside the paths. At runtime each path runs from the split
+straight to its own end.
+
+**How it was established.** mxcli's own documented shape
+(`mxcli syntax workflow parallel-split`), with one `call microflow` at the top
+level of the same workflow as a control:
+
+```sql
+create or replace workflow Trends.SplitProbe
+  parameter $Context: Trends.ReadingCheck
+begin
+  call microflow Trends.ACT_LogOutcome with (Trends.ACT_LogOutcome.Check = '$WorkflowContext');
+  parallel split probeSplit
+    path 1 { call microflow Trends.ACT_NotifyOwner with (...); }
+    path 2 { call microflow Trends.ACT_Escalate    with (...); };
+end workflow;
+```
+
+`mxcli check` passes. MxBuild reports 0 errors. `describe workflow` round-trips
+the paths' contents exactly as written. `system$workflowactivity` after one
+instance:
+
+```
+ Start                      | Finished
+ ACT_LogOutcome             | Finished     <- the control, at the top level
+ Parallel split             | Finished
+ End of parallel split path | Finished     <- path 1, with nothing in between
+ End of parallel split path | Finished     <- path 2, with nothing in between
+ Merge of Parallel split    | Finished
+ End                        | Finished
+```
+
+The top-level call logged. The two inside the paths left no log line and **no
+activity record at all**. Full capture in
+[`docs/workflow/07-parallel-split-empty.txt`](docs/workflow/07-parallel-split-empty.txt).
+
+**Why it matters more than most.** Every gate this repo has says the workflow is
+fine, including the one that reads the model back. The process in
+`mdl/workflow/44-workflow.mdl` was designed with a parallel split and is
+sequential because of this.
+
+---
+
+## 7. Three workflow shapes that build, and do nothing
+
+*Mendix 11.14.0. Two are silent; the third has an error that names the wrong
+thing.*
+
+- **Activities after a user task are unreachable.** A user task has no "next":
+  each outcome is its own path, running to its own end. Anything written after
+  the task at the same level is never executed, and the instance simply
+  completes. No error at check, at build or at runtime. The fix is to write
+  whatever follows *inside* an outcome — which means a decision reached by two
+  outcomes has to be repeated, or reached by a jump.
+
+- **A boundary-event path cannot be ended from MDL.** Mendix requires a jump or
+  an end activity (`CE0105`), and MDL has no end-activity statement, so a jump
+  is the only available ending. mxcli's own documented example
+  (`mxcli syntax workflow boundary-event`) ends with a `call microflow` and does
+  not build:
+
+  ```
+  [CE0105] Call microflow cannot be the last object of a flow, it should end
+  with a jump or end activity.
+  ```
+
+- **`System.User_UserRoles` is not the association's name.** The `system-module`
+  skill's table names it that; XPath wants `System.UserRoles`. Three user tasks
+  carrying the same targeting constraint made it three build errors
+  (`CE1613 The selected association ... no longer exists`) rather than one.
+
+---
+
+## 8. Smaller things
 
 - **Mendix 10 CDN versions are four-part.** `10.24.24` does not resolve;
   `10.24.24.119653` does. The three-part number is the one a user has in their
@@ -258,6 +337,10 @@ carries.
   `--direct --host localhost --port <admin-port>` is the way to be explicit.
   The default admin port (8090) also collides with a second app started on
   `--app-port 8090`, and the collision is reported against the app port.
+- **A microflow data source with a parameter needs its argument written out.**
+  The `create-page` widgets reference says `datasource: microflow Module.GetData`
+  — "no `()`, the name alone". That holds only for a parameterless microflow;
+  with one, Mendix fails `CE1571` and mxcli's own reference check says so.
 - **The Best Practice Recommender flags the seed microflow** (MXP005, *Commit
   inside Loop*, 1 occurrence), seen in Studio Pro 11.14 on this project. It is
   reading `Trends.ASu_CreateTrendData`, which commits one meter and one list of

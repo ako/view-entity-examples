@@ -1,0 +1,11 @@
+-- What a microflow is, from the runtime's side. MicroflowEngine at TRACE,
+-- one call of the task page's data source:
+
+    2026-09-13 09:07:18.177 DEBUG - MicroflowEngine: Starting execution of microflow 'Trends.DS_CheckForTask'
+    2026-09-13 09:07:18.177 TRACE - MicroflowEngine: Executing activity: {"current_activity_id":"d1887fdf-e38e-4995-8e22-fe998ac239ac","current_activity":{"type":"Start"},"name":"Trends.DS_CheckForTask","type":"Microflow"}
+    2026-09-13 09:07:18.177 TRACE - MicroflowEngine: Executing activity: {"current_activity_id":"41470067-1676-444f-bfce-76f647f2366c","current_activity":{"caption":"Retrieve ReadingCheck from database","type":"RetrieveByXPath"},"name":"Trends.DS_CheckForTask","type":"Microflow"}
+    2026-09-13 09:07:18.181 TRACE - MicroflowEngine: Executing activity: {"current_activity_id":"ce8f76b6-0ddb-4744-ba67-0963d6bf1477","current_activity":{"type":"End"},"name":"Trends.DS_CheckForTask","type":"Microflow"}
+    2026-09-13 09:07:18.181 DEBUG - MicroflowEngine: Finished execution of microflow 'Trends.DS_CheckForTask'
+
+-- Start, one retrieve, End. Four milliseconds, and then it is gone.
+-- There is no state left behind, and nothing to come back to.

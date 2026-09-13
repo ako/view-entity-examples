@@ -1,8 +1,9 @@
 # View entity examples
 
-One Mendix app (10.24.24), two worked examples about publishing view entities
-over OData. Every error message, payload, SQL statement and query plan in
-`docs/` was captured from the running app.
+Two Mendix apps and six worked examples: view entities over OData in
+`app/` (10.24.24), and a workflow in `app-workflow/` (11.14.0, security on).
+Every error message, payload, SQL statement, query plan and activity record in
+`docs/` was captured from a running app.
 
 | | |
 |---|---|
@@ -11,6 +12,7 @@ over OData. Every error message, payload, SQL statement and query plan in
 | **3. What a view entity is** | The same machinery from zero: one view entity, a data grid on top of it, and what the database is asked as you sort, page and filter. For someone who has never written a query. [docs 6](docs/06-view-entities-101.md) |
 | **4. A view entity that points at an entity** | Selecting a persistent entity's id under an alias gives the view entity an association. It works on 10.24 — but mxcli cannot write it, and the difference turns out to be one field. What the association costs at runtime, against carrying the id as a string. [docs 7](docs/07-view-entity-associations.md), [docs 8](docs/08-shaping-and-composing.md) |
 | **5. Composing** | A view entity that reads another view entity: one statement, nested twice — and a filter on the outer one still reaches the index at the bottom. [docs 8](docs/08-shaping-and-composing.md) |
+| **6. Why workflows exist** | A second app, on Mendix 11.14 with security on, and a process that waits: a flagged meter reading goes to a reviewer, a large correction is countersigned, three days of silence escalates it on its own. What a workflow buys over a status attribute, measured rather than asserted. [docs 9](docs/09-workflows.md) |
 
 ---
 

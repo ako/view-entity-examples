@@ -126,3 +126,32 @@ put half a statement on each of two frames.
 
 Splitting them anyway would also have pushed the film to ~335s, past the
 ceiling. Given a choice between two numbers, length is the one a viewer feels.
+
+
+## Film 5, and the number that was being measured wrong
+
+`workflows-101` is 26 frames for 329.5s at 74% density — inside all three of
+Type C's bands, and the first film here to land in the frame band too.
+
+It took two trim passes, and the first one was aimed at the wrong number. The
+manifest's per-scene `tail` is not the only silence in a scene: there are gaps
+between sentences as well, and summing `clips + tail` gave 326.8s for a film
+that planned at **344.7s**. The number to read is `planned` in
+`capture/<deck>/clips.json`, which is what `record.js` and `assemble.js` use.
+Two passes, 41 words, and 15 seconds later it is 329.5s.
+
+| | film 1 | film 2 | film 3 | film 4 | film 5 |
+|---|---|---|---|---|---|
+| frames | 13 | 11 | 22 | 19 | 26 |
+| length | 340s | 235s | 328s | 321s | 330s |
+| voice density | ~85% | ~82% | 72% | 72% | 74% |
+
+Film 3's note — that a beginner film needs more frames for the same material,
+because each frame carries less — holds. This one is for someone who may not
+have built a microflow either, and 26 frames is what that cost.
+
+One frame is a placeholder by design. `whole` carries the model's own outline
+where a Studio Pro screenshot of the workflow editor should be; the canvas is
+the one thing this pipeline cannot photograph, because mxcli writes the model
+and nobody opens the editor. The rules for swapping it in are film 3's, above,
+and `decks/workflows-101/SCRIPT.md` repeats them next to the frame.

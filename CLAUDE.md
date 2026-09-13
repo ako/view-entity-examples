@@ -1,9 +1,21 @@
 # view-entity-examples
 
-Two things live here: a Mendix app under [`app/`](app) that the examples are
-built in, and a video pipeline under [`video/`](video) that films them. The
-write-ups are in [`docs/`](docs), and every model change is an MDL script in
-[`mdl/`](mdl), numbered in execution order.
+Two things live here: Mendix apps that the examples are built in, and a video
+pipeline under [`video/`](video) that films them. The write-ups are in
+[`docs/`](docs), and every model change is an MDL script in [`mdl/`](mdl),
+numbered in execution order.
+
+There are **two apps**, and a script belongs to exactly one of them:
+
+| app | Mendix | security | scripts |
+|---|---|---|---|
+| [`app/`](app) `ViewEntityExamples.mpr` | 10.24.24.119653 | off | `mdl/*.mdl` |
+| [`app-workflow/`](app-workflow) `WorkflowExample.mpr` | 11.14.0 | prototype | `mdl/workflow/*.mdl` |
+
+The second app exists because the first one's OData examples depend on security
+being off, and half of the workflow material is about who can see a task and who
+has claimed it. Its demo users are `reviewer` / `ReviewThis123` and
+`supervisor` / `SuperviseIt123`.
 
 ## Read the mxcli skills before touching the model
 
@@ -12,6 +24,10 @@ write-ups are in [`docs/`](docs), and every model change is an MDL script in
 level below the root a session usually opens. Nothing surfaces them
 automatically from here. Running `mxcli init .` at the root does not help: it
 resolves to the project and re-initialises `app/` again.
+
+The workflow app has its own copy at `app-workflow/.claude/skills/` (and a
+mirror under `.ai-context/skills/`). They are the same 74; read whichever is
+next to the `.mpr` you are changing.
 
 So read them as files. The ones this repo keeps needing:
 
@@ -23,6 +39,8 @@ So read them as files. The ones this repo keeps needing:
 | publishing over OData | `odata-data-sharing/` |
 | demo data | `demo-data/` |
 | running it | `run-local/`, `analyze-runtime/` |
+| a workflow, a user task, a timer | `write-workflows/`, `system-module/` |
+| security, roles, demo users | `manage-security/` |
 | an error you do not recognise | `cheatsheet-errors/`, `check-syntax/` |
 
 They are worth the read: four of the things logged in
@@ -39,6 +57,14 @@ fetches it back). Always from `app/`:
 ./mxcli check ../mdl/20-basics-view.mdl -p ViewEntityExamples.mpr
 ./mxcli exec  ../mdl/20-basics-view.mdl -p ViewEntityExamples.mpr
 ./mxcli run --local --ensure-db -p ViewEntityExamples.mpr
+```
+
+and from `app-workflow/`, on its own ports so both can run at once:
+
+```bash
+./mxcli exec ../mdl/workflow/44-workflow.mdl -p WorkflowExample.mpr
+./mxcli run  --local --ensure-db -p WorkflowExample.mpr --app-port 8200 --admin-port 8201
+./mxcli oql  --port 8201 -p WorkflowExample.mpr "select ... from System.Workflow as w"
 ```
 
 A model change is never made in Studio Pro and copied here: it goes into a
