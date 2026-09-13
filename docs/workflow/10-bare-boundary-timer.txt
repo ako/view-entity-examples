@@ -20,4 +20,7 @@
 --   boundary event non interrupting timer '...'
 
 -- ako/mxcli#457 refuses it at check and exec time as MDL-WF07, and fixes the
--- syntax help and the write-workflows skill that taught the failing form.
+-- syntax help and the write-workflows skill that taught the failing form. It is
+-- merged, so the "Check passed!" above is history: a current mxcli stops you.
+-- Mendix's own behaviour is unchanged - mxbuild still reports 0 errors, and the
+-- runtime still will not load the model.

@@ -440,25 +440,26 @@ the screen after clicking:  unchanged.</pre>
 },
 {
   id: "edges", label: "What gets past", kind: "result",
-  narration: "And the same lesson, worse. A boundary timer that does not say whether it interrupts passes check and passes the build. Then the app does not start at all.",
+  narration: "And the same lesson, worse. A boundary timer that does not say whether it interrupts builds with zero errors. Then the app does not start at all.",
   steps: 3, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }, { step: 3, s: 3 }],
   html: `
-    <h2>check passed. 0 errors. No app.</h2>
-    <p class="sub">docs/workflow/10-bare-boundary-timer.txt &middot; mxcli's own documented example</p>
+    <h2>Zero errors, and no app</h2>
+    <p class="sub">docs/workflow/10-bare-boundary-timer.txt &middot; Mendix 11.14.0</p>
     <div class="card">
 <pre><span class="kw">boundary event timer</span> <span class="str">'addDays([%CurrentDateTime%], 3)'</span> {   <span class="cm">&lt;- no kind named</span>
   <span class="kw">call microflow</span> Trends.ACT_Escalate <span class="kw">with</span> (Check = <span class="str">'$WorkflowContext'</span>);
 };</pre>
     </div>
     <div class="card step" data-step="1" style="margin-top:20px">
-<pre>mxcli check:  Check passed!        mxbuild:  0 errors.</pre>
+<pre>mxbuild:  0 errors.          <span class="cm">-- Mendix's own build, unchanged</span>
+mxcli check:  refuses it      <span class="cm">-- MDL-WF07, since ako/mxcli#457</span></pre>
     </div>
     <div class="card step" data-step="2" style="margin-top:20px">
 <pre><span class="accent">RuntimeException: aborting model initialization
 (Class 'Workflows$TimerBoundaryEvent' could not be found).</span></pre>
     </div>
-    <p class="note step" data-step="3">Not the workflow &mdash; the app. Write
-       <code>interrupting</code> or <code>non interrupting</code> and it boots.</p>`
+    <p class="note step" data-step="3">Not the workflow &mdash; the app. The tool has a gate for this now; the
+       platform never did.</p>`
 },
 {
   id: "when-not", label: "When not to", kind: "result",

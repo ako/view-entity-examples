@@ -12,7 +12,7 @@ Unless a finding says otherwise:
 | Mendix | 10.24.24.119653 (some findings re-run on 11.14.0, noted where so) |
 | mxcli | nightly-20260909-ca9b90ed |
 | | §1-§3 re-tested against [ako/mxcli#452](https://github.com/ako/mxcli/pull/452) (`a039e67`), built here |
-| | §6-§8 re-tested against [ako/mxcli#457](https://github.com/ako/mxcli/pull/457) (`3c4598ed`), built here |
+| | §6-§8 re-tested against [ako/mxcli#457](https://github.com/ako/mxcli/pull/457) (`3c4598ed`), built here; **merged** as `0964395c` |
 | Database | PostgreSQL 16 |
 | Host | Linux container, JDK 21 and 25 both present |
 
@@ -373,7 +373,9 @@ rebuilt and started with the release binary to confirm it.
 ## 8. A boundary timer that names no kind stops the app from booting
 
 *Mendix 11.14.0. Found by [ako/mxcli#457](https://github.com/ako/mxcli/pull/457),
-confirmed here. __Fixed__ in the same PR, as `MDL-WF07`.*
+confirmed here. __Fixed__ in the same PR, as `MDL-WF07`, and merged — so a
+current mxcli refuses this. The platform behaviour below is unchanged: it is
+what still happens to anyone who gets past the tool.*
 
 `boundary event timer '<duration>'`, with neither `interrupting` nor
 `non interrupting`, stores `Workflows$TimerBoundaryEvent` — a type no 11.x
