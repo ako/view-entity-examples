@@ -12,6 +12,7 @@ Unless a finding says otherwise:
 | Mendix | 10.24.24.119653 (some findings re-run on 11.14.0, noted where so) |
 | mxcli | nightly-20260909-ca9b90ed |
 | | §1-§3 re-tested against [ako/mxcli#452](https://github.com/ako/mxcli/pull/452) (`a039e67`), built here |
+| | §6-§8 re-tested against [ako/mxcli#457](https://github.com/ako/mxcli/pull/457) (`3c4598ed`), built here |
 | Database | PostgreSQL 16 |
 | Host | Linux container, JDK 21 and 25 both present |
 
@@ -248,6 +249,7 @@ carries.
 ## 6. A parallel split written from MDL runs both paths empty
 
 *Mendix 11.14.0, mxcli nightly-20260909-ca9b90ed, in `app-workflow/`.*
+*__FIXED in [ako/mxcli#457](https://github.com/ako/mxcli/pull/457)__ — verified below.*
 
 **What it is.** `PARALLEL SPLIT ... PATH 1 { ... } PATH 2 { ... }` is written to
 the model with the split, its two path ends and its merge — but not with
@@ -288,28 +290,66 @@ activity record at all**. Full capture in
 [`docs/workflow/07-parallel-split-empty.txt`](docs/workflow/07-parallel-split-empty.txt).
 
 **Why it matters more than most.** Every gate this repo has says the workflow is
-fine, including the one that reads the model back. The process in
-`mdl/workflow/44-workflow.mdl` was designed with a parallel split and is
-sequential because of this.
+fine, including the one that reads the model back.
+
+**Fixed.** #457 writes the `EndOfParallelSplitPath` activity Mendix ends each
+path with; the engine runs a path only as far as that marker, which is why an
+unmarked path did nothing. Re-run here on the PR build, same probe, unchanged:
+
+```
+ Start                      | Finished
+ ACT_LogOutcome             | Finished    <- the control
+ Parallel split             | Finished
+ ACT_Escalate               | Finished    <- path 2, absent before the fix
+ ACT_NotifyOwner            | Finished    <- path 1, absent before the fix
+ End of parallel split path | Finished
+ End of parallel split path | Finished
+ Merge of Parallel split    | Finished
+ End                        | Finished
+```
+
+Both microflows logged, neither did before.
+[`mdl/workflow/47-parallel-split.mdl`](mdl/workflow/47-parallel-split.mdl) is the
+shape the main process was designed with, kept as a separate script because
+*writing* it needs a #457 build. Once written the model is ordinary: this app was
+rebuilt and started with the release binary to confirm it.
 
 ---
 
-## 7. Three workflow shapes that build, and do nothing
+## 7. Two workflow shapes that build and do nothing, and one that was my mistake
 
-*Mendix 11.14.0. Two are silent; the third has an error that names the wrong
-thing.*
+*Mendix 11.14.0. Both real ones are __FIXED in
+[ako/mxcli#457](https://github.com/ako/mxcli/pull/457)__.*
 
-- **Activities after a user task are unreachable.** A user task has no "next":
-  each outcome is its own path, running to its own end. Anything written after
-  the task at the same level is never executed, and the instance simply
-  completes. No error at check, at build or at runtime. The fix is to write
-  whatever follows *inside* an outcome — which means a decision reached by two
-  outcomes has to be repeated, or reached by a jump.
+- **~~Activities after a user task are unreachable.~~ Wrong — retracted.** They
+  run. This was a misdiagnosis of §6: the activities I could not see were
+  *inside* a parallel split's paths, and the split was what swallowed them. The
+  evidence was in front of me at the time — the same trace showed a top-level
+  `Decision` finishing after the user task — and I read past it.
+
+  #457 declined to claim this one, saying it was not confirmed, and was right to.
+  Its own probe could not complete a user task (a scheduled event runs as the
+  system, and the runtime refuses: `Only named users can complete user task`).
+  This app can, because it has real users and a task page, so the retraction is
+  measured rather than argued: one user task with three **empty** outcomes and
+  one `call microflow` after it at the top level, completed as the `reviewer`
+  demo user through the page —
+
+  ```
+  12:09:27 | Start                                        | Finished |
+  12:09:28 | Probe: is there anything after a user task   | Finished | Accept
+  12:09:28 | (boundary)                                   | Aborted  |
+  12:19:48 | ACT_NotifyOwner                              | Finished | <void>
+  12:19:48 | End                                          | Finished |
+  ```
+
+  `ACT_NotifyOwner` is the activity after the user task. It ran, after an empty
+  outcome, and the microflow logged.
 
 - **A boundary-event path cannot be ended from MDL.** Mendix requires a jump or
-  an end activity (`CE0105`), and MDL has no end-activity statement, so a jump
-  is the only available ending. mxcli's own documented example
-  (`mxcli syntax workflow boundary-event`) ends with a `call microflow` and does
+  an end activity (`CE0105`), and MDL had no end-activity statement, so a jump
+  was the only available ending. mxcli's own documented example
+  (`mxcli syntax workflow boundary-event`) ends with a `call microflow` and did
   not build:
 
   ```
@@ -317,14 +357,43 @@ thing.*
   with a jump or end activity.
   ```
 
+  **Fixed.** #457 writes the `EndOfBoundaryEventPath` activity unless the path
+  already ends in a jump. Verified here: the same shape now builds and the app
+  boots.
+
 - **`System.User_UserRoles` is not the association's name.** The `system-module`
   skill's table names it that; XPath wants `System.UserRoles`. Three user tasks
   carrying the same targeting constraint made it three build errors
   (`CE1613 The selected association ... no longer exists`) rather than one.
+  **Fixed** in #457's skill-reference commit, along with the microflow-datasource
+  entry in §8.
 
 ---
 
-## 8. Smaller things
+## 8. A boundary timer that names no kind stops the app from booting
+
+*Mendix 11.14.0. Found by [ako/mxcli#457](https://github.com/ako/mxcli/pull/457),
+confirmed here. __Fixed__ in the same PR, as `MDL-WF07`.*
+
+`boundary event timer '<duration>'`, with neither `interrupting` nor
+`non interrupting`, stores `Workflows$TimerBoundaryEvent` — a type no 11.x
+runtime has. `mxcli check` passes, mxbuild reports 0 errors, and then:
+
+```
+Caused by: java.lang.RuntimeException: No new model classes have arrived within
+ten seconds, aborting model initialization(Class 'Workflows$TimerBoundaryEvent'
+could not be found).
+```
+
+The app does not come up at all — not the workflow, the app. This is the worst
+of the failure modes in this file, and until #457 it was **the example in
+`mxcli syntax workflow boundary-event`**, copied verbatim into this probe. The
+capture is in
+[`docs/workflow/10-bare-boundary-timer.txt`](docs/workflow/10-bare-boundary-timer.txt).
+
+---
+
+## 9. Smaller things
 
 - **Mendix 10 CDN versions are four-part.** `10.24.24` does not resolve;
   `10.24.24.119653` does. The three-part number is the one a user has in their
@@ -338,9 +407,10 @@ thing.*
   The default admin port (8090) also collides with a second app started on
   `--app-port 8090`, and the collision is reported against the app port.
 - **A microflow data source with a parameter needs its argument written out.**
-  The `create-page` widgets reference says `datasource: microflow Module.GetData`
+  The `create-page` widgets reference said `datasource: microflow Module.GetData`
   — "no `()`, the name alone". That holds only for a parameterless microflow;
   with one, Mendix fails `CE1571` and mxcli's own reference check says so.
+  **Fixed** in [ako/mxcli#457](https://github.com/ako/mxcli/pull/457).
 - **The Best Practice Recommender flags the seed microflow** (MXP005, *Commit
   inside Loop*, 1 occurrence), seen in Studio Pro 11.14 on this project. It is
   reading `Trends.ASu_CreateTrendData`, which commits one meter and one list of

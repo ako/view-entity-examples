@@ -194,8 +194,8 @@ And what IS the process?                 <span class="step cm" data-step="2">-- 
   <span class="str">'Ask for a re-read'</span> { <span class="cm">-- wait, then ask again</span> }</pre>
     </div>
     <p class="note step" data-step="2">Each outcome is a button on the task's page and
-       <span class="accent">a path out of the box</span>. A user task has no other exit: there is no
-       "next activity" after it, only its outcomes.</p>`
+       <span class="accent">a path out of the box</span>. Whichever one is chosen, the instance
+       carries on from there.</p>`
 },
 {
   id: "page", label: "The task page", kind: "command",
@@ -433,25 +433,26 @@ the screen after clicking:  unchanged.</pre>
        that can be read, reviewed and changed on purpose.</p>`
 },
 {
-  id: "edges", label: "Sharp edges", kind: "result",
-  narration: "Three that bite on day one, all measured here. A user task has no next activity. A boundary path can only end in a jump. A parallel split runs both paths empty.",
+  id: "edges", label: "What gets past", kind: "result",
+  narration: "And the same lesson, worse. A boundary timer that does not say whether it interrupts passes check and passes the build. Then the app does not start at all.",
   steps: 3, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }, { step: 3, s: 3 }],
   html: `
-    <h2>Three that build cleanly and do nothing</h2>
-    <p class="sub">FINDINGS.md &sect;6-7 &middot; docs/errors-workflow.txt</p>
+    <h2>check passed. 0 errors. No app.</h2>
+    <p class="sub">docs/workflow/10-bare-boundary-timer.txt &middot; mxcli's own documented example</p>
     <div class="card">
-<pre><span class="cm">-- 1. anything after a user task is unreachable. no error, anywhere.</span>
-<span class="cm">-- 2. a boundary path can only end in a jump (CE0105). MDL has no end.</span>
-<span class="cm">-- 3. a parallel split runs BOTH PATHS EMPTY.</span></pre>
+<pre><span class="kw">boundary event timer</span> <span class="str">'addDays([%CurrentDateTime%], 3)'</span> {   <span class="cm">&lt;- no kind named</span>
+  <span class="kw">call microflow</span> Trends.ACT_Escalate <span class="kw">with</span> (Check = <span class="str">'$WorkflowContext'</span>);
+};</pre>
     </div>
-    <div class="card step" data-step="1" style="margin-top:22px">
-<pre>Parallel split             | Finished
-End of parallel split path | Finished     <span class="cm">-- path 1, nothing in between</span>
-End of parallel split path | Finished     <span class="cm">-- path 2, nothing in between</span></pre>
+    <div class="card step" data-step="1" style="margin-top:20px">
+<pre>mxcli check:  Check passed!        mxbuild:  0 errors.</pre>
     </div>
-    <p class="note step" data-step="2">check passes, the build passes, and describe reads the paths
-       back exactly as written. <span class="accent">The only thing that tells you is the runtime,
-       doing nothing.</span></p>`
+    <div class="card step" data-step="2" style="margin-top:20px">
+<pre><span class="accent">RuntimeException: aborting model initialization
+(Class 'Workflows$TimerBoundaryEvent' could not be found).</span></pre>
+    </div>
+    <p class="note step" data-step="3">Not the workflow &mdash; the app. Write
+       <code>interrupting</code> or <code>non interrupting</code> and it boots.</p>`
 },
 {
   id: "when-not", label: "When not to", kind: "result",

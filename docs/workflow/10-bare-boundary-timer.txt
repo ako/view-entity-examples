@@ -1,0 +1,23 @@
+-- A boundary timer that names no kind stops the app from booting.
+--
+-- This is mxcli's own documented example, verbatim from
+-- `mxcli syntax workflow boundary-event` on nightly-20260909-ca9b90ed:
+
+    user task ReviewTask 'Review'
+      page Module.WF_Review
+      outcomes 'Done' { }
+      boundary event timer 'P3D' {
+        call microflow Module.WF_Escalate;
+      };
+
+-- mxcli check: Check passed!   mxbuild: 0 errors.   Then, on startup:
+
+    Caused by: java.lang.RuntimeException: No new model classes have arrived within ten seconds, aborting model initialization(Class 'Workflows$TimerBoundaryEvent' could not be found).
+
+-- The app does not come up at all. It stores Workflows$TimerBoundaryEvent,
+-- which no 11.x runtime has; the kind has to be named:
+--   boundary event interrupting timer '...'
+--   boundary event non interrupting timer '...'
+
+-- ako/mxcli#457 refuses it at check and exec time as MDL-WF07, and fixes the
+-- syntax help and the write-workflows skill that taught the failing form.

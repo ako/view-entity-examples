@@ -119,19 +119,31 @@ The task that was waiting is **Aborted** — that is what *interrupting* means.
 
 ## What this example does not do, and why
 
-Three shapes build cleanly and do nothing at runtime. Two of them are silent
-everywhere; all three are in [`FINDINGS.md`](../FINDINGS.md) §6–7 and
-[`errors-workflow.txt`](errors-workflow.txt).
+Two shapes built cleanly and did nothing at runtime, and both are fixed in
+[ako/mxcli#457](https://github.com/ako/mxcli/pull/457) — verified here, in
+[`FINDINGS.md`](../FINDINGS.md) §6–8 and
+[`11-pr457-verification.txt`](workflow/11-pr457-verification.txt).
 
-- **A parallel split runs both paths empty.** The process here was designed with
+- **A parallel split ran both paths empty.** The process here was designed with
   one — notify the owner *while* the supervisor reads it — and is sequential
-  because of it.
-- **Activities after a user task are unreachable.** A user task has no "next";
-  each outcome is its own path. Everything after a task therefore lives inside
-  an outcome, which is why the decision is nested where it is.
-- **A boundary path can only end with a jump.** MDL has no end activity, so the
-  escalation marks the check and puts the question back rather than ending the
-  instance the way Studio Pro would.
+  because of it. [`mdl/workflow/47-parallel-split.mdl`](../mdl/workflow/47-parallel-split.mdl)
+  is the designed shape, kept separate because *writing* it needs a #457 build;
+  once written, any mxcli reads it and any 11.x runtime runs it.
+- **A boundary path could only end with a jump.** MDL had no end activity, so
+  the escalation marks the check and puts the question back rather than ending
+  the instance the way Studio Pro would. That shape is unchanged here, because
+  putting the question back is a reasonable thing for it to do.
+
+And one that is worse than either, because the app does not come up at all: a
+**boundary timer that names no kind** stores a class no 11.x runtime has. Until
+#457 it was the example in `mxcli syntax workflow boundary-event`
+([`10-bare-boundary-timer.txt`](workflow/10-bare-boundary-timer.txt)).
+
+I also recorded, beside the parallel split, that *activities after a user task
+are unreachable*. **That was wrong**, and it was a misdiagnosis of the split:
+the activities I could not find were inside its paths. They run — measured by
+completing a real task as a real user, which is what the earlier probe could not
+do. The retraction is in [`FINDINGS.md`](../FINDINGS.md) §7.
 
 ## When not to use one
 

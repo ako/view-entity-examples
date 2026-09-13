@@ -130,7 +130,7 @@ ceiling. Given a choice between two numbers, length is the one a viewer feels.
 
 ## Film 5, and the number that was being measured wrong
 
-`workflows-101` is 26 frames for 329.5s at 74% density — inside all three of
+`workflows-101` is 26 frames for 327.1s at 74% density — inside all three of
 Type C's bands, and the first film here to land in the frame band too.
 
 It took two trim passes, and the first one was aimed at the wrong number. The
@@ -155,3 +155,17 @@ where a Studio Pro screenshot of the workflow editor should be; the canvas is
 the one thing this pipeline cannot photograph, because mxcli writes the model
 and nobody opens the editor. The rules for swapping it in are film 3's, above,
 and `decks/workflows-101/SCRIPT.md` repeats them next to the frame.
+
+
+### Re-cutting a film because a frame turned out to be wrong
+
+Two of `workflows-101`'s frames stated a defect that ako/mxcli#457 declined to
+reproduce, and the PR was right: it was a misdiagnosis. The frames were rewritten
+and the deck re-run end to end — `check`, `build-audio`, `record`, `assemble` —
+rather than patched in the cut, because the pipeline has no way to splice one
+scene into a finished film and no reason to grow one. Nine minutes of machine
+time against a film that says something untrue is not a trade worth thinking
+about.
+
+The re-cut moved the film from 329.5s to 327.1s, so the bands were re-checked
+rather than assumed. They held at 74%.

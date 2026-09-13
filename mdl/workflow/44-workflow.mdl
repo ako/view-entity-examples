@@ -9,18 +9,22 @@
 -- case-sensitive from 11.9 on - $workflowContext is an undefined variable and
 -- fails the build with CE0117.
 --
--- THREE THINGS THAT SHAPE THIS SCRIPT, all of them measured rather than read:
+-- TWO THINGS THAT SHAPE THIS SCRIPT, both measured rather than read:
 --
--- 1. A user task has no "next" activity. Each outcome is its own path and runs
---    to its own end; anything written after the task at the same level is never
---    reached, and nothing reports it - not check, not the build, not the
---    runtime. So everything that happens after a task lives INSIDE an outcome.
--- 2. A boundary-event path must end with a jump. Mendix wants a jump or an end
---    activity (CE0105) and MDL cannot write an end activity, so a jump is the
---    only ending available from here.
--- 3. A parallel split written from MDL runs both paths EMPTY - see
+-- 1. A boundary-event path must end with a jump. Mendix wants a jump or an end
+--    activity (CE0105) and MDL could not write an end activity, so a jump was
+--    the only ending available. Fixed in ako/mxcli#457; kept as a jump here
+--    because putting the question back is a reasonable thing for it to do.
+-- 2. A parallel split written from MDL ran both paths EMPTY - see
 --    docs/workflow/07-parallel-split-empty.txt. This process was designed with
---    one and is sequential because of it.
+--    one and is sequential because of it. Also fixed in #457, with the designed
+--    shape kept in 47-parallel-split.mdl rather than folded back in here, so
+--    this script stays reproducible with a released mxcli.
+--
+-- What is NOT true, though an earlier version of this header said it was:
+-- activities after a user task are NOT unreachable. They run. The decision is
+-- nested inside the 'Accept' outcome because that is where it belongs, not
+-- because it has to be. See FINDINGS 7.
 
 create or replace workflow Trends.CheckReading
   parameter $Context: Trends.ReadingCheck

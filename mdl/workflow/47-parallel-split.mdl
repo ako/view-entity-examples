@@ -1,0 +1,37 @@
+-- Film 5, appendix - a parallel split that actually runs.
+--
+-- NEEDS mxcli WITH ako/mxcli#457 TO WRITE. Mendix ends each path of a parallel
+-- split with an EndOfParallelSplitPath activity, and the engine runs a path only
+-- as far as that marker. Until #457 mxcli wrote the split, the path ends and the
+-- merge but nothing in between, so both paths ran EMPTY - check passed, mxbuild
+-- passed, `describe workflow` read the paths back exactly as written, and at
+-- runtime each path went from the split straight to its own end.
+-- See docs/workflow/07-parallel-split-empty.txt for the failure and
+-- docs/workflow/11-pr457-verification.txt for the fix.
+--
+-- Once written the model is ordinary: any mxcli can read it and any 11.x runtime
+-- runs it. This is why the main process in 44-workflow.mdl is sequential - it
+-- was designed with a split here, and stays reproducible with a released mxcli.
+--
+-- To watch it run, point the starter at it for one run:
+--   $Probe = call workflow Trends.NotifyAndCountersign(WorkflowContext = $Check);
+
+create or replace workflow Trends.NotifyAndCountersign
+  parameter $Context: Trends.ReadingCheck
+  display 'Notify and countersign, at the same time'
+  description 'What the accepted branch of CheckReading was designed to do: tell the meter''s owner while a supervisor countersigns, rather than after.'
+begin
+  parallel split splitSecondLook
+    path 1 {
+      user task Countersign 'Countersign a large correction'
+        page Trends.TaskReview
+        targeting xpath '[System.UserRoles/System.UserRole/Name = ''Supervisor'']'
+        outcomes
+          'Accept' { call microflow Trends.ACT_LogOutcome with (Trends.ACT_LogOutcome.Check = '$WorkflowContext'); }
+          'Reject' { call microflow Trends.ACT_LogOutcome with (Trends.ACT_LogOutcome.Check = '$WorkflowContext'); };
+    }
+    path 2 {
+      call microflow Trends.ACT_NotifyOwner
+        with (Trends.ACT_NotifyOwner.Check = '$WorkflowContext');
+    };
+end workflow;

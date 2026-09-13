@@ -80,7 +80,7 @@ Mendix 11.14.0, mxcli nightly-20260909-ca9b90ed. In the order it happened.
    microflow with no parameters.
 
 
-8. NOTHING MAY END A BOUNDARY PATH EXCEPT A JUMP
+8. NOTHING MAY END A BOUNDARY PATH EXCEPT A JUMP   (fixed in ako/mxcli#457)
 
    [CE0105] User task cannot be the last object of a flow, it should end with a
    jump or end activity. — at Trends / Workflow 'CheckReading' / User task
@@ -105,19 +105,37 @@ Mendix 11.14.0, mxcli nightly-20260909-ca9b90ed. In the order it happened.
      MxBuild rejects this (CE1876)                [MDL-WF02]
 
 
-10. THE TWO THAT NOTHING REPORTS AT ALL
+10. THE ONE THAT NOTHING REPORTS AT ALL
 
-    Both pass mxcli check, pass mxbuild, and round-trip through
-    `describe workflow` exactly as written. Neither does anything at runtime.
+    A parallel split runs both paths EMPTY. It passes mxcli check, passes
+    mxbuild, and round-trips through `describe workflow` exactly as written.
+    Whatever is inside `path N { ... }` does not reach the executable model:
+    each path goes from the split straight to its own end.
 
-    a) Activities written after a user task at the same level are unreachable.
-       A user task has no "next": each outcome is its own path and runs to its
-       own end. The instance simply completes, with no error anywhere.
+    See docs/workflow/07-parallel-split-empty.txt for the probe and the activity
+    records. FIXED in ako/mxcli#457, verified in
+    docs/workflow/11-pr457-verification.txt.
 
-    b) A parallel split runs both paths EMPTY. See
-       docs/workflow/07-parallel-split-empty.txt for the probe and the activity
-       records. mxcli writes the split and its path ends; whatever is inside
-       `path N { ... }` does not reach the executable model.
+    I also wrote down, next to it, that "activities after a user task are
+    unreachable". That was WRONG, and it was a misdiagnosis of this same defect:
+    the activities I could not find were inside the split's paths. They run.
+    See FINDINGS 7.
+
+
+10b. AND THE ONE THAT STOPS THE APP FROM BOOTING
+
+    boundary event timer 'addDays([%CurrentDateTime%], 3)' { ... }
+
+    with neither `interrupting` nor `non interrupting` on it. check passes,
+    mxbuild reports 0 errors, and the runtime will not load the model:
+
+    Caused by: java.lang.RuntimeException: No new model classes have arrived
+    within ten seconds, aborting model initialization(Class
+    'Workflows$TimerBoundaryEvent' could not be found).
+
+    Until ako/mxcli#457 this was the example printed by
+    `mxcli syntax workflow boundary-event`. Capture in
+    docs/workflow/10-bare-boundary-timer.txt.
 
 
 11. AND ONE THE PLATFORM DOES NOT REPORT, BUT mxcli DOES

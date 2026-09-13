@@ -1,0 +1,43 @@
+-- ako/mxcli#457 verified against the repros in FINDINGS 6 and 7.
+-- Built from the PR head (3c4598ed) and run on this app, Mendix 11.14.0.
+
+-- 1. PARALLEL SPLIT (FINDINGS 6). Fixed.
+--    The same probe as 07-parallel-split-empty.txt, unchanged:
+
+    Start                        | Finished
+    ACT_LogOutcome               | Finished
+    Parallel split               | Finished
+    ACT_Escalate                 | Finished
+    Merge of Parallel split      | Finished
+    ACT_NotifyOwner              | Finished
+    End of parallel split path   | Finished
+    End of parallel split path   | Finished
+    End                          | Finished
+
+--    Both paths now run. Before the fix the two middle rows did not exist
+--    and neither microflow logged; now both do:
+
+    2026-09-13 12:09:28.272 INFO - Trends: Notified the owner of meter M-004 about the reading of 3/11/25, 12:00 AM
+    2026-09-13 12:09:28.277 INFO - Trends: Reading check escalated for meter M-004
+
+-- 2. BOUNDARY PATH ENDING (FINDINGS 7, second bullet). Fixed.
+--    A boundary path ending on a call microflow rather than a jump - the
+--    shape that was CE0105 - now builds and boots. mxcli writes the
+--    EndOfBoundaryEventPath activity Mendix wants.
+
+-- 3. AFTER A USER TASK (FINDINGS 7, first bullet). NOT A DEFECT.
+--    My finding was wrong, and the PR is right to have refused it.
+
+--    Probe: one user task with three EMPTY outcomes, and one call microflow
+--    after it at the top level. Completed as the 'reviewer' demo user
+--    through the task page, which is what the earlier probe could not do.
+
+    12:09:27 | Start                                      | Finished  | 
+    12:09:28 | Probe: is there anything after a user task | Finished  | Accept
+    12:09:28 | (boundary)                                 | Aborted   | 
+    12:19:48 | ACT_NotifyOwner                            | Finished  | <void>
+    12:19:48 | End                                        | Finished  | 
+
+--    ACT_NotifyOwner is the activity after the user task, and it ran. What
+--    actually failed in the original observation was the parallel split the
+--    missing activities were INSIDE - finding 6, not a second defect.
