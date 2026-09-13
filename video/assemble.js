@@ -13,7 +13,19 @@ const fs = require('fs');
 const { deck } = require('./deck.js');
 const DECK = deck(process.argv);
 const OUT = DECK.outDir;
-const BED = 'audio/bed.wav';
+
+// The bed is off unless a deck asks for it, and audio/bed.wav is not a bed you
+// want: measured, it is a drone centred on 100-125 Hz with NOTHING above 630 Hz
+// (that band and up sits at -91 dB, digital silence). That is the same range as
+// bm_george's fundamental, so it does not read as music under the voice - it
+// reads as a rumble behind it, which is what it was reported as. Films 1-4 were
+// rendered with it; see NOTES.md.
+const BED = DECK.meta.bed === true ? 'audio/bed.wav' : null;
+
+// Kokoro leaves a little rumble below the voice. Two poles at 70 Hz is -3 dB
+// there, under -1 dB by 100 Hz and nothing at the 125-160 Hz fundamental, so it
+// takes the rumble and leaves the voice alone.
+const VOICE = 'highpass=f=70:poles=2';
 fs.mkdirSync(OUT, { recursive: true });
 
 const manifest = JSON.parse(fs.readFileSync(DECK.manifest, 'utf8'));
@@ -44,18 +56,21 @@ for (const sc of manifest) {
   // frames - silence is a legitimate instruction to read (training-video.md).
   const bedDb = sc.kind === 'result' ? -16 : 0;   // relative to the -32 LUFS bed
   const bedAt = (sc.index * 7) % 60;              // a different stretch per scene
+  const bedIn = BED ? ['-ss', String(bedAt), '-t', target.toFixed(3), '-i', BED] : [];
+  const mix = BED
+    ? `[1:a]apad=pad_dur=5,atrim=0:${target.toFixed(3)},${VOICE}[v];` +
+      `[2:a]volume=${bedDb}dB,afade=t=in:st=0:d=0.8,` +
+        `afade=t=out:st=${Math.max(0, target - 1.0).toFixed(2)}:d=1.0[b];` +
+      `[v][b]amix=inputs=2:duration=first:normalize=0[a]`
+    : `[1:a]apad=pad_dur=5,atrim=0:${target.toFixed(3)},${VOICE}[a]`;
   const r = spawnSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error',
     '-ss', head.toFixed(3), '-i', vin, '-i', ain,
-    '-ss', String(bedAt), '-t', target.toFixed(3), '-i', BED,
+    ...bedIn,
     // hold the last frame if the capture came up short, then cut both streams
     // at the same instant so nothing accumulates into the next clip
     '-vf', `setpts=PTS/${scale.toFixed(5)},tpad=stop_mode=clone:stop_duration=5,` +
            `fps=30,scale=1920:1080,format=yuv420p`,
-    '-filter_complex',
-      `[1:a]apad=pad_dur=5,atrim=0:${target.toFixed(3)}[v];` +
-      `[2:a]volume=${bedDb}dB,afade=t=in:st=0:d=0.8,` +
-        `afade=t=out:st=${Math.max(0, target - 1.0).toFixed(2)}:d=1.0[b];` +
-      `[v][b]amix=inputs=2:duration=first:normalize=0[a]`,
+    '-filter_complex', mix,
     '-map', '0:v', '-map', '[a]',
     '-t', String(target.toFixed(3)),
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-profile:v', 'high',
