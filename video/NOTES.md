@@ -216,3 +216,51 @@ Two changes in `assemble.js`:
 
 Silence under a result frame was always the instruction (training-video.md). It
 is now actually silence.
+
+
+## Every `.shot` image was being stretched
+
+Found while fitting the workflow-editor screenshots. `#stage` is a flex column,
+so an `img` in it is a flex item and `align-items: stretch` — the default — made
+it fill the cross axis: **1728px wide whatever its own width was**. `max-height`
+then clamped the height independently, and `object-fit` defaults to `fill`, so
+the picture was squashed rather than letterboxed. Measured on a 1300x390 crop:
+rendered 1728x452.
+
+It went unnoticed because the earlier shots were wide and short enough that the
+distortion was mild, and because a stretched image still passes every check in
+`check.js` — the safe area is about position, not proportion. Film 3's three
+Studio Pro frames and film 5's two runtime screenshots were all affected.
+
+```css
+.shot{ … align-self:flex-start; object-fit:contain; … }
+```
+
+`align-self` stops the stretch so `width:auto` gives the intrinsic width again,
+and `object-fit:contain` is there so a future `.shot` with an explicit size
+letterboxes instead of squashing. All four earlier decks still pass `check.js`
+with the fix; their mp4s on disk keep the old rendering until re-assembled.
+
+The frame budget tightened as a result: a correctly-proportioned image is taller
+than a squashed one, so both new photographed frames had to give height back to
+the type before they fitted.
+
+
+## Film 5's photographed frames
+
+Two, against film 3's three, and by the same rules — cropped never upscaled, a
+hairline rather than a card, and the Studio Pro version named in the sub line.
+
+- **`timer`** pairs the MDL boundary event with Studio Pro's own *Interrupting:
+  Yes / No* radio. That is the choice MDL let you leave out, and leaving it out
+  is what the next frame's boot failure is about — so the two frames now argue
+  in sequence rather than separately.
+- **`whole`** is the frame that had been a placeholder since the proposal: the
+  canvas on the left, the MDL on the right, one document held two ways. The
+  picture is deliberately too small to read. That is the point of it — the film
+  asked in frame 5 what the process *is*, and the answer is that it now has a
+  shape you can take in at a glance.
+
+Sixteen screenshots were supplied; these two and the crops behind them are what
+the film uses. The rest are in `video/shots/sp-wf-*.png`, named for what they
+show, and are the record of the same model in the editor.

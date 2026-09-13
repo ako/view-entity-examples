@@ -345,16 +345,16 @@ the screen after clicking:  unchanged.</pre>
   steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 3 }],
   html: `
     <h2>Three days, no answer</h2>
-    <p class="sub">mdl/workflow/44-workflow.mdl &middot; a boundary event on the user task</p>
+    <p class="sub">mdl/workflow/44-workflow.mdl &middot; the same event in Studio Pro 11.14.0 Beta</p>
     <div class="card">
 <pre><span class="kw">boundary event interrupting timer</span> <span class="str">'addDays([%CurrentDateTime%], 3)'</span> {
   <span class="kw">call microflow</span> Trends.ACT_Escalate <span class="kw">with</span> (Check = <span class="str">'$WorkflowContext'</span>);
-  <span class="kw">jump to</span> Review;
-};</pre>
+  <span class="cm">-- 2 more lines: the jump back, and the close</span></pre>
     </div>
-    <p class="note step" data-step="1">Four lines, hung on the side of the task.
-       <span class="accent">There is no microflow that does this.</span> Not a slow one &mdash; none.
-       A transaction cannot be three days long.</p>`
+    <img class="shot step" data-step="1" style="margin-top:18px;max-height:296px"
+         src="shots/wf-boundary-kind.png" alt="the boundary event's interrupting and timer properties">
+    <p class="note step" data-step="2"><span class="accent">There is no microflow that does this.</span>
+       Not a slow one &mdash; none.</p>`
 },
 {
   id: "timer-fired", label: "It fires", kind: "result",
@@ -414,23 +414,31 @@ the screen after clicking:  unchanged.</pre>
 },
 {
   id: "whole", label: "The whole thing", kind: "result",
-  narration: "That is the whole process. Sixty-one lines of MDL. It is one thing now, that can be read and changed.",
-  steps: 2, cues: [{ step: 1, s: 2 }, { step: 2, s: 3 }],
+  narration: "That is the whole process, as Studio Pro draws it. You are not meant to read it — only to see that it has a shape.",
+  steps: 1, cues: [{ step: 1, s: 2 }],
   html: `
-    <h2>Sixty-one lines, one process</h2>
-    <p class="sub">mdl/workflow/44-workflow.mdl &middot; describe workflow round-trips it</p>
-    <div class="card">
-<pre><span class="kw">user task</span> Review <span class="str">'Review the flagged reading'</span>
-  <span class="kw">targeting xpath</span> <span class="str">'[System.UserRoles/System.UserRole/Name = ''Reviewer'']'</span>
+    <h2>One process, two ways of holding it</h2>
+    <p class="sub">mdl/workflow/44-workflow.mdl &middot; the same document, in Studio Pro 11.14.0 Beta</p>
+    <div class="cols">
+      <div class="col">
+        <img class="shot" style="max-height:420px" src="shots/wf-canvas.png"
+             alt="the CheckReading workflow on the Studio Pro canvas">
+      </div>
+      <div class="col">
+        <div class="card">
+<pre><span class="kw">user task</span> Review
   <span class="kw">outcomes</span>
-    <span class="str">'Accept'</span> { <span class="kw">decision</span> decisionBig <span class="cm">-- true: notify, then countersign</span> }
-    <span class="str">'Reject'</span> { <span class="kw">call microflow</span> Trends.ACT_LogOutcome }
-    <span class="str">'Ask for a re-read'</span> { <span class="kw">wait for timer</span>; <span class="kw">jump to</span> Review; }
-  <span class="kw">boundary event interrupting timer</span> <span class="str">'3 days'</span> { <span class="kw">jump to</span> Review; };</pre>
+    <span class="str">'Accept'</span> { <span class="kw">decision</span> decisionBig }
+    <span class="str">'Reject'</span> { log }
+    <span class="str">'Ask for a re-read'</span> { <span class="kw">jump</span> }
+  <span class="kw">boundary event interrupting timer</span>
+    { escalate; <span class="kw">jump to</span> Review; };
+<span class="cm">-- 47 more lines, written out</span></pre>
+        </div>
+      </div>
     </div>
-    <p class="note step" data-step="1">The point is not the shape of it.
-       <span class="accent">The process is one thing now</span> &mdash; one document, in the model,
-       that can be read, reviewed and changed on purpose.</p>`
+    <p class="note step" data-step="1">One task, three branches, a second look, a timer off to the side.
+       <span class="accent">The status attribute never had a shape.</span></p>`
 },
 {
   id: "edges", label: "What gets past", kind: "result",
