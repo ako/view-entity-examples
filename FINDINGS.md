@@ -393,6 +393,28 @@ of the failure modes in this file, and until #457 it was **the example in
 capture is in
 [`docs/workflow/10-bare-boundary-timer.txt`](docs/workflow/10-bare-boundary-timer.txt).
 
+**What the fix covers, measured on the merged code.** The write path is closed
+properly: `exec` refuses it as well as `check`, and **`exec --no-check` refuses
+it too** — the usual escape hatch does not get past this one. Studio Pro cannot
+produce one either; its dialog makes *Interrupting* a Yes/No radio with no third
+state ([`video/shots/sp-wf-boundary-timer.png`](video/shots/sp-wf-boundary-timer.png)).
+
+**Two gaps left, both on the read side.** The guard is on writing, so a model
+that *already* carries a bare timer — written by an older mxcli, which is every
+mxcli before this one — is not reported by anything:
+
+- `mxcli lint` over such a project: **0 errors**, and the only line naming the
+  workflow is `QUAL002` (no documentation). Nothing about the boundary event.
+- `describe workflow` **silently omits it**. The round-trip output is the user
+  task and its outcomes with no boundary event at all, so `describe → drop →
+  exec` quietly deletes the escalation path — which does make the app boot
+  again, by removing the thing that was broken.
+
+So the answer to "am I safe if I use mxcli" is yes for anything written from
+now on, and no for anything already in a project: the first symptom is still a
+runtime that will not start. A lint rule over stored boundary events would close
+it.
+
 ---
 
 ## 9. Smaller things
