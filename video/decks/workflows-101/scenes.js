@@ -144,21 +144,19 @@ And what IS the process?                 <span class="step cm" data-step="2">-- 
 {
   id: "context", label: "Context entity", kind: "command",
   narration: "One flagged reading, one instance. That is the context entity, and it must be persistent: the instance outlives the request.",
-  steps: 2, cues: [{ step: 1, s: 2 }, { step: 2, s: 2 }],
+  steps: 2, cues: [{ step: 1, s: 1 }, { step: 2, s: 2 }],
   html: `
     <h2>Every instance is <em>about</em> something</h2>
-    <p class="sub">mdl/workflow/44-workflow.mdl &middot; the workflow's one parameter</p>
+    <p class="sub">mdl/workflow/40-domain.mdl &middot; the same model in Studio Pro 11.14.0 Beta</p>
     <div class="card">
 <pre><span class="kw">create or replace workflow</span> Trends.CheckReading
-  <span class="kw">parameter</span> $Context: Trends.ReadingCheck
-  <span class="kw">display</span> <span class="str">'Check a flagged reading'</span>
-<span class="kw">begin</span>
-  <span class="cm">-- 55 more lines, the rest of this film</span>
-<span class="kw">end workflow</span>;</pre>
+  <span class="kw">parameter</span> $Context: Trends.ReadingCheck</pre>
     </div>
-    <p class="note step" data-step="2">One <code>ReadingCheck</code>, one instance. It has to be
-       <span class="accent">persistent</span> &mdash; the instance outlives the request that started
-       it, so the thing it is about has to outlive it too.</p>`
+    <img class="shot step" data-step="1" style="margin-top:16px;max-height:286px"
+         src="shots/wf-domain-model.png" alt="the Trends domain model">
+    <p class="note step" data-step="2">One <code>ReadingCheck</code>, one instance &mdash; with its own
+       association to <code>System.Workflow</code>, off to the left.
+       <span class="accent">It has to be persistent</span>: the instance outlives the request.</p>`
 },
 {
   id: "first", label: "The smallest one", kind: "command",

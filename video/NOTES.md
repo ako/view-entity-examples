@@ -261,6 +261,20 @@ hairline rather than a card, and the Studio Pro version named in the sub line.
   asked in frame 5 what the process *is*, and the answer is that it now has a
   shape you can take in at a glance.
 
-Sixteen screenshots were supplied; these two and the crops behind them are what
-the film uses. The rest are in `video/shots/sp-wf-*.png`, named for what they
-show, and are the record of the same model in the editor.
+A third landed in a second batch: **`context`** now carries the domain model
+under the workflow's `parameter` line, with `ReadingCheck_Workflow` trailing off
+to the left edge — the association to `System.Workflow` that Mendix does not
+create for you, which the frame's note points at.
+
+Twenty-one screenshots were supplied. Three crops are in the film; the security
+dialogs went into `docs/09-workflows.md` instead, where the write-up asserts
+"security on, two users" and now shows it. The rest are kept as
+`video/shots/sp-wf-*.png`, named for what they show — the record of the same
+model in the editor.
+
+The reason the security shots did not make the film: there is one frame about
+roles (`targeting`), it already carries the XPath and a picture of the inbox,
+and the inbox is the better half of that pair for a beginner — it shows the task
+in somebody's list, which is what "decides who the task shows up for" means. A
+frame budget is a real constraint and a good screenshot is not a reason to
+spend it.

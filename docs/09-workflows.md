@@ -54,6 +54,22 @@ Stop the app. Start it again. Same ids, same state, same open task
 ([`03-restart.txt`](workflow/03-restart.txt)). That is the thing the status
 attribute was pretending to be.
 
+## Security, because a process without users is not a process
+
+`app/` runs with security off — that is why every OData request in this repo
+needs no credentials. This app cannot: half of what follows is about who can see
+a task and who has claimed it. Hence a second app, at **Prototype / demo**,
+with two roles and two users
+([`mdl/workflow/45-security.mdl`](../mdl/workflow/45-security.mdl)).
+
+![App Security, user roles](../video/shots/wf-user-roles.png)
+
+The two role names are load-bearing: the user tasks target on
+`System.UserRoles/System.UserRole/Name`, so renaming one here means the task
+silently reaches nobody. The demo users are `reviewer` / `ReviewThis123` and
+`supervisor` / `SuperviseIt123`
+([`wf-demo-users.png`](../video/shots/wf-demo-users.png)).
+
 ## The five pieces, and what each is for
 
 | | |
