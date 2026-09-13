@@ -169,3 +169,50 @@ about.
 
 The re-cut moved the film from 329.5s to 327.1s, so the bands were re-checked
 rather than assumed. They held at 74%.
+
+
+## The bed was not music, it was a rumble
+
+Reported as "a low bass noise in the background", and the measurement agrees.
+`audio/bed.wav` swept in third-octave bands:
+
+```
+   30 Hz  -77.1      160 Hz  -44.5      630 Hz  -82.5
+   45 Hz  -62.4      200 Hz  -47.4      800 Hz  -91.0
+   60 Hz  -53.2      250 Hz  -51.6     1000 Hz  -91.0
+   80 Hz  -46.1      315 Hz  -57.4     2000 Hz  -91.0
+  100 Hz  -43.0      400 Hz  -64.7     4000 Hz  -91.0
+  125 Hz  -42.6      500 Hz  -72.6
+```
+
+-91 dB is digital silence, so there is **nothing above 630 Hz at all**. It is not
+a bed with a low end; it is a drone centred on 100-125 Hz and nothing else — the
+same range as `bm_george`'s fundamental (which peaks at 125-160 Hz). Under the
+voice it does not read as music, it reads as a rumble behind the voice.
+
+The whole-film average hid it: dropping the bed moved the film's mean level by
+0.3 dB and its sub-80 Hz mean by 0.8 dB. That is because the average is
+dominated by the loud passages, and the bed was 13 dB under the voice there. It
+lived in the **gaps**. One measured tail, the last 1.4s of scene 3:
+
+| | with the bed | without |
+|---|---|---|
+| mean | -33.7 dB | -91.0 dB (digital silence) |
+
+Every tail in the film — and the type spends 25-30% of its length in them — was
+carrying an audible drone that nothing was masking.
+
+Two changes in `assemble.js`:
+
+- **The bed is opt-in**: `BED` is used only when a deck's `deck.json` says
+  `"bed": true`. No deck says it. Films 1-4 were rendered with it and the mp4s on
+  disk still have it; re-assembling any of them now drops it, which is the right
+  outcome but is a change to a shipped film, so it is a decision rather than a
+  side effect.
+- **The voice gets a high-pass** at 70 Hz, two poles, for the rumble Kokoro
+  leaves under it. That is -3 dB at 70 Hz, under -1 dB by 100 Hz and nothing at
+  the fundamental. Integrated loudness after both changes: -18.8 LUFS against the
+  -18.6 target, so the normalisation did not move.
+
+Silence under a result frame was always the instruction (training-video.md). It
+is now actually silence.
