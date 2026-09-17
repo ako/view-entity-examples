@@ -8,6 +8,7 @@
 // belonging to a click can be cut out of the log afterwards; the offsets land
 // in /tmp/marks.json and docs/sql/08-grid-retrieve.sql is built from them.
 const { chromium } = require('playwright');
+const { chromiumOpts } = require('../browser.js');
 const fs = require('fs');
 const LOG = require('path').resolve(__dirname, '../../app/.mxcli/runtime.log');
 const mark = () => fs.statSync(LOG).size;
@@ -15,8 +16,7 @@ const marks = {};
 
 (async () => {
   const b = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH ||
-      '/opt/pw-browsers/chromium-1229/chrome-linux64/chrome',
+    ...chromiumOpts(),
   });
   const p = await b.newPage({ viewport: { width: 1400, height: 820 }, deviceScaleFactor: 2 });
 

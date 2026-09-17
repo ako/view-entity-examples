@@ -1,13 +1,14 @@
 // Layout check: every scene, all reveals shown, as stills. Cheaper than a take,
 // and the only way to notice text overflowing 1080p before recording 5 minutes.
 const { chromium } = require('playwright');
+const { chromiumOpts } = require('./browser.js');
 const path = require('path'); const fs = require('fs');
 const { deck } = require('./deck.js');
 const DECK = deck(process.argv);
 const SCENES = DECK.scenes;
 (async () => {
   fs.mkdirSync(DECK.previewDir, { recursive: true });
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1229/chrome-linux64/chrome' });
+  const b = await chromium.launch({ ...chromiumOpts() });
   const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
   for (let i = 0; i < SCENES.length; i++) {
     await p.goto('file://' + path.resolve('shell.html') + '?deck=' + DECK.name + '&scene=' + i);

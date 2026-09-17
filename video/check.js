@@ -8,6 +8,7 @@
 // the assertions are made against the computed style and real geometry.
 //
 const { chromium } = require('playwright');
+const { chromiumOpts } = require('./browser.js');
 const { deck } = require('./deck.js');
 const fs = require('fs');
 const path = require('path');
@@ -51,7 +52,7 @@ const CMAP = new Set(JSON.parse(fs.readFileSync('fonts/cmap.json', 'utf8')));
 
   // --- rendered checks -----------------------------------------------------
   const browser = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium-1229/chrome-linux64/chrome',
+    ...chromiumOpts(),
   });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   const url = 'file://' + path.resolve('shell.html');

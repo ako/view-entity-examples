@@ -1,10 +1,11 @@
 const { chromium } = require('playwright');
+const { chromiumOpts } = require('./browser.js');
 const fs = require('fs');
 const LOG = '/home/user/view-entity-examples/app/.mxcli/runtime.log';
 const mark = () => fs.statSync(LOG).size;
 const marks = {};
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1229/chrome-linux64/chrome' });
+  const b = await chromium.launch({ ...chromiumOpts() });
   const p = await b.newPage({ viewport: { width: 1400, height: 820 }, deviceScaleFactor: 2 });
   marks.a = mark();
   await p.goto('http://127.0.0.1:8080/p/meter-ref', { waitUntil: 'networkidle' });

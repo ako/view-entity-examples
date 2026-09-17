@@ -84,3 +84,25 @@ there is no cumulative drift to model and a re-record costs one scene.
 | `record.js` | one clip per scene, both clock anchors recorded |
 | `assemble.js` | mux, concat, contact sheet |
 | `preview.js` | stills, for layout |
+
+
+## Running the pipeline off the container
+
+Everything that was hardcoded to this container's layout is now an environment
+variable with the container's path as the default, so the same checkout runs on
+a laptop:
+
+| | |
+|---|---|
+| `CHROMIUM_PATH` | the browser every script launches. Unset it on a machine with Playwright's own download and Playwright finds its own — `browser.js` only passes `executablePath` when there is one to pass. |
+| `KOKORO_HOME` | where `kokoro-v1.0.onnx` and `voices-v1.0.bin` live (or `KOKORO_MODEL` / `KOKORO_VOICES` individually). |
+| `KOKORO_VOICE`, `KOKORO_SPEED` | already existed. |
+
+Also needed locally: node, ffmpeg, python3 with `kokoro-onnx` and `soundfile`,
+and the Recursive font files already in `fonts/`.
+
+**`capture/` and `audio/` are gitignored and live only on the machine that built
+them.** On this container that means a reclaim costs a full re-record of every
+deck; the decks and narration are in git, so nothing is lost, but it is hours
+rather than minutes. On a laptop they persist, which is the real argument for
+building there.

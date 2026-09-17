@@ -18,6 +18,7 @@
 // the canvas, it does not scale it.
 //
 const { chromium } = require('playwright');
+const { chromiumOpts } = require('./browser.js');
 const { deck } = require('./deck.js');
 const fs = require('fs');
 const path = require('path');
@@ -46,8 +47,7 @@ const CLIPS = DECK.clipDir;
   // The container ships its own Chromium; this playwright build wants a
   // different revision. Point at what is here rather than downloading one.
   const browser = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH ||
-      '/opt/pw-browsers/chromium-1229/chrome-linux64/chrome',
+    ...chromiumOpts(),
   });
   const url = 'file://' + path.resolve('shell.html');
   const report = [];
